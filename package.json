@@ -4,6 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "installall": "npm run install:server && npm run install:web",
+    "install:server": "cd c-trader-server && npm install",
+    "install:web": "cd c-trader-web && npm install",
     "build:cleanup": "rm -rf build",
     "build:script:package": "node ./c-trader-scripts/copy-package-json.js",
     "build:client": "cd c-trader-web && npm run build",
