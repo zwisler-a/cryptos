@@ -1,0 +1,16 @@
+{
+  "name": "c-trader",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build:cleanup": "rm -rf build",
+    "build:script:package": "node ./c-trader-scripts/copy-package-json.js",
+    "build:client": "cd c-trader-web && npm run build",
+    "build:server": "cd c-trader-server && npm run build",
+    "build:copy": "cp -r ./c-trader-server/dist ./build && cp -r ./c-trader-web/dist/c-trader-web ./build/client",
+    "build": "npm run build:cleanup && npm run build:client && npm run build:server && npm run build:copy && npm run build:script:package"
+  },
+  "author": "",
+  "license": "ISC"
+}

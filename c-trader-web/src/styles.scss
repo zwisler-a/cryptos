@@ -1,0 +1,82 @@
+/* You can add global styles to this file, and also import other style files */
+
+.table {
+  .right {
+    text-align: right;
+  }
+  .btn {
+    margin: 0;
+  }
+  td {
+    vertical-align: middle;
+  }
+}
+.BUY {
+  padding: 4px;
+  border-radius: 2px;
+  background-color: rgb(218, 255, 181);
+  text-align: center;
+  min-width: 40px;
+  display: inline-block;
+}
+
+.SELL {
+  padding: 4px;
+  border-radius: 2px;
+  background-color: rgb(252, 184, 184);
+  text-align: center;
+  min-width: 40px;
+  display: inline-block;
+}
+
+.text-flash.up {
+  animation: flashRedColor 300ms ease-out;
+}
+
+.text-flash.down {
+  animation: flashGreenColor 300ms ease-out;
+}
+
+@keyframes flashRedColor {
+  from {
+    color: red;
+  }
+  to {
+    color: #666;
+  }
+}
+
+@keyframes flashGreenColor {
+  from {
+    color: green;
+  }
+  to {
+    color: #666;
+  }
+}
+
+.background-flash.up {
+  animation: flashRedBg 300ms ease-out;
+}
+
+.background-flash.down {
+  animation: flashGreenBg 300ms ease-out;
+}
+
+@keyframes flashRedBg {
+  from {
+    background-color: red;
+  }
+  to {
+    background-color: white;
+  }
+}
+
+@keyframes flashGreenBg {
+  from {
+    background-color: green;
+  }
+  to {
+    background-color: white;
+  }
+}
