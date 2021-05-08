@@ -1,10 +1,5 @@
 import { Logger } from '@nestjs/common';
-import {
-  ConnectedSocket,
-  MessageBody,
-  SubscribeMessage,
-  WebSocketGateway,
-} from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { BalanceTrackingService } from 'src/data-tracking/balance-tracking.service';
 import { BalanceService } from 'src/service/balance.service';
@@ -48,10 +43,7 @@ export class TotalBalanceGateway extends SubscriptionManager {
     this.logger.debug(`Subscribe Balance Currency ${body.currency} ...`);
 
     this.balanceTrackingService
-      .getLastXMinutes(body.currency, body.timespan || 60)
-      .pipe(
-        this.balanceTrackingService.filterForIntervalPipe(body.interval || 1),
-      )
+      .getLast(body.currency, body.timespan || 60, body.interval || 1)
       .subscribe((data) => {
         client.emit('get-history-data-' + body.currency, data);
       });

@@ -31,6 +31,7 @@ import { WalletIndicatorComponent } from './components/wallet-indicator.componen
 import { LoggerModule, NgxLoggerLevel } from 'ngx-logger';
 import { ValueChartComponent } from './components/graphs/value-chart.component';
 import { PositionService } from './services/position.service';
+import { PositionChartComponent } from './pages/positions/position-chart.component';
 
 ClarityIcons.addIcons(namespaceIcon, timesIcon);
 
@@ -54,7 +55,8 @@ ClarityIcons.addIcons(namespaceIcon, timesIcon);
     SellFormComponent,
     IndicatorChartComponent,
     WalletIndicatorComponent,
-    ValueChartComponent
+    ValueChartComponent,
+    PositionChartComponent
   ],
   imports: [
     BrowserModule,

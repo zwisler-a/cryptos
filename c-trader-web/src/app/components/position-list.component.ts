@@ -18,13 +18,11 @@ import { ChartData } from '../types/chart-data.type';
           <th class="right">Change</th>
           <th class="right"></th>
           <th>Side</th>
+          <th class="right"></th>
         </tr>
       </thead>
       <tbody>
-        <tr
-          (click)="positionSelected(position.id)"
-          *ngFor="let position of positions$ | async"
-        >
+        <tr *ngFor="let position of positions$ | async">
           <td class="left">{{ position.instrument }}</td>
           <td class="right">{{ position.quantity }}</td>
           <td class="right">
@@ -45,6 +43,14 @@ import { ChartData } from '../types/chart-data.type';
           </td>
           <td>
             <span [ngClass]="position.side">{{ position.side }}</span>
+          </td>
+          <td>
+            <span>
+              <button
+                (click)="positionSelected(position.id)"
+                class="btn btn-sm"
+              >View</button>
+            </span>
           </td>
         </tr>
       </tbody>

@@ -1,22 +1,41 @@
-import { Component, ElementRef, Input, OnInit } from '@angular/core';
-import {
-  createChart,
-  IChartApi,
-  ISeriesApi,
-  UTCTimestamp,
-} from 'lightweight-charts';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import { createChart, IChartApi, ISeriesApi, UTCTimestamp } from 'lightweight-charts';
 import { Observable, Subscription } from 'rxjs';
 import { ChartData } from 'src/app/types/chart-data.type';
 
 @Component({
   selector: 'app-value-chart',
-  template: ``,
-  styles: [``],
+  template: `
+    <div
+      class="chart"
+      [ngClass]="{ hidden: loading, 'fade-in': !loading }"
+      #chart
+    ></div>
+    <div class="progress loop fade-in" *ngIf="loading">
+      <progress></progress>
+    </div>
+  `,
+  styles: [
+    `
+      :host {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+      }
+      .chart {
+        display: flex;
+      }
+      .hidden {
+        opacity: 0;
+      }
+    `,
+  ],
 })
 export class ValueChartComponent implements OnInit {
+  @ViewChild('chart', { static: true }) chartRef?: ElementRef<any>;
   private chart?: IChartApi;
   private areaSeries?: ISeriesApi<'Area'>;
-
+  loading = true;
   private dataSubscription?: Subscription;
 
   @Input() rangeInMinutes = 60;
@@ -27,20 +46,23 @@ export class ValueChartComponent implements OnInit {
     }
     if (val) {
       this.areaSeries?.setData([]);
-      val.subscribe(this.updateData.bind(this));
+      this.loading = true;
+      this.dataSubscription = val.subscribe(this.updateData.bind(this));
     }
   }
 
   constructor(private ref: ElementRef) {}
 
   private updateData(data: ChartData[]) {
+    this.loading = false;
     if (!this.chart) window.requestAnimationFrame(() => this.updateData(data));
     data.forEach((value) => this.areaSeries?.update(value));
     this.setRange();
   }
 
   ngOnInit(): void {
-    this.chart = createChart(this.ref.nativeElement, {
+    if (!this.chartRef) return console.log('fuck');
+    this.chart = createChart(this.chartRef.nativeElement, {
       layout: { backgroundColor: '#33333300' },
       grid: { horzLines: { visible: true }, vertLines: { visible: false } },
       width: this.ref.nativeElement.width,

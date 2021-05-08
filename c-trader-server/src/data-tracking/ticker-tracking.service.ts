@@ -1,12 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { from, Subscription } from 'rxjs';
+import { from, Observable, Subscription } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { CryptoService } from 'src/crypto/crypto.service';
 import { SubscribeTicker } from 'src/crypto/types/subscriptions/ticker.subscription';
 import { TickerRepository } from 'src/entities/repos/ticker.repository';
 import { TickerEntity } from 'src/entities/ticker.entity';
-import { Between } from 'typeorm/find-options/operator/Between';
 
 @Injectable()
 export class TickerTrackingService {
@@ -21,15 +20,22 @@ export class TickerTrackingService {
     this.watch();
   }
 
-  getLastXMinutes(instrument: string, minutes: number) {
-    const now = new Date();
-    const past = new Date(now.getTime() - minutes * 60 * 1000);
-    return from(
-      this.tickerRepo.find({
-        where: { time: Between(past, now), instrument },
-        order: { time: 'ASC' },
-      }),
-    );
+
+  getLast(
+    instrument: string,
+    minutes: number,
+    interval: number,
+  ): Observable<TickerEntity[]> {
+    const past = new Date(new Date().getTime() - minutes * 60 * 1000);
+    const query = this.tickerRepo
+      .createQueryBuilder()
+      .select()
+      .where('instrument = :instrument AND time > :past', { instrument, past })
+      .groupBy(
+        `FLOOR(TIMESTAMPDIFF(Second, '2010-01-01 00:00:00', time) / ${interval})`,
+      )
+      .orderBy(`time`, 'ASC');
+    return from(query.getMany());
   }
 
   filterForIntervalPipe(intervalInMs: number) {

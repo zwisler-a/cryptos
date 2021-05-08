@@ -40,25 +40,9 @@ export class PositionService {
 
   tickerStream(instrument: string) {
     return concat(
-      this.tickerService
-        .getHistoricalData(instrument)
-        .pipe(this.roundTimePipe()),
-      this.tickerService.stream(instrument).pipe(
-        map((d) => [d]),
-        this.roundTimePipe()
-      )
-    );
-  }
-
-  private roundTimePipe() {
-    return map((data: TickerData[]) =>
-      data.map((d: TickerData) => {
-        return {
-          ...d,
-          data: [{ ...d.data[0], t: Math.floor(d.data[0].t / 60000) * 60000 }],
-        };
-      })
-    );
+      this.tickerService.getHistoricalData(instrument, 60, 1 * 60 * 1000),
+      this.tickerService.stream(instrument).pipe(map((d) => [d]))
+    ).pipe(this.tickerService.roundTimePipe(60 * 1));
   }
 
   openPosition(instrument: string, side: 'BUY' | 'SELL') {

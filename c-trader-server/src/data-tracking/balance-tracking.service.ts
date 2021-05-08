@@ -25,31 +25,22 @@ export class BalanceTrackingService {
     private balanceRepo: BalanceRepository,
   ) {}
 
-  getLastXMinutes(currency: string, minutes: number) {
-    const now = new Date();
-    const past = new Date(now.getTime() - minutes * 60 * 1000);
-    return from(
-      this.balanceRepo.find({
-        where: { timestamp: Between(past, now), currency },
-        order: { timestamp: 'ASC' },
-      }),
-    );
-  }
 
-  
-  filterForIntervalPipe(intervalInMs: number) {
-    return map((data: BalanceEntitiy[]) => {
-      let nextTick = 0;
-      return data.filter((tick) => {
-        const dateInMs = tick.timestamp.getTime();
-        if (nextTick < dateInMs) {
-          nextTick = dateInMs + intervalInMs;
-          return true;
-        } else {
-          return false;
-        }
-      });
-    });
+  getLast(
+    currency: string,
+    minutes: number,
+    interval: number,
+  ): Observable<BalanceEntitiy[]> {
+    const past = new Date(new Date().getTime() - minutes * 60 * 1000);
+    const query = this.balanceRepo
+      .createQueryBuilder()
+      .select()
+      .where('currency = :currency AND timestamp > :past', { currency, past })
+      .groupBy(
+        `FLOOR(TIMESTAMPDIFF(Second, '2010-01-01 00:00:00', timestamp) / ${interval})`,
+      )
+      .orderBy(`timestamp`, 'ASC');
+    return from(query.getMany());
   }
 
   @Cron('3 * * * * *')

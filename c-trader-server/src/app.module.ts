@@ -1,4 +1,6 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
@@ -9,19 +11,17 @@ import { DataTrackingModule } from './data-tracking/data-tracking.module';
 import { BalanceEntitiy } from './entities/balance.entity';
 import { PositionEntity } from './entities/position.entity';
 import { PositionRepository } from './entities/repos/position.repository';
-import { BalanceGateway } from './gateway/wallet.gateway';
+import { TickerEntity } from './entities/ticker.entity';
 import { CandlestickGateway } from './gateway/candlestick.gateway';
 import { InstrumentGateway } from './gateway/instrument.gateway';
 import { PositionGateway } from './gateway/position.gateway';
 import { TickerGateway } from './gateway/ticker.gateway';
+import { TotalBalanceGateway } from './gateway/total-balance.gateway';
 import { TradesGateway } from './gateway/trades.gateway';
+import { BalanceGateway } from './gateway/wallet.gateway';
 import { BalanceService } from './service/balance.service';
 import { PositionService } from './service/position.service';
 import { TickerService } from './service/ticker.service';
-import { ScheduleModule } from '@nestjs/schedule';
-import { TotalBalanceGateway } from './gateway/total-balance.gateway';
-import { TickerEntity } from './entities/ticker.entity';
-import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -55,7 +55,7 @@ import { ConfigModule } from '@nestjs/config';
     PositionService,
     BalanceService,
     TickerService,
-    TotalBalanceGateway,
+    TotalBalanceGateway
   ],
 })
 export class AppModule {}

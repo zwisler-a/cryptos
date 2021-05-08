@@ -25,10 +25,9 @@ import { ChartData } from 'src/app/types/chart-data.type';
       </div>
       <div class="card-block">
         <div class="card-text"></div>
-        <app-value-chart
-          class="chart"
-          [data]="position.ticker"
-        ></app-value-chart>
+        <app-position-chart
+          [instrument]="position.instrument"
+        ></app-position-chart>
         <div class="card-text">
           <app-buy-form
             *ngIf="position.side == 'BUY'"
@@ -51,11 +50,6 @@ import { ChartData } from 'src/app/types/chart-data.type';
   `,
   styles: [
     `
-      .chart {
-        display: flex;
-        justify-content: center;
-        margin: 16px;
-      }
       .card-header {
         display: flex;
         align-items: center;

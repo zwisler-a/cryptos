@@ -10,9 +10,7 @@ export class PositionGateway {
   @WebSocketServer()
   server: Server;
 
-  constructor(
-    private positionService: PositionService
-  ) {}
+  constructor(private positionService: PositionService) {}
 
   @SubscribeMessage('create')
   async createPosition(
@@ -50,5 +48,4 @@ export class PositionGateway {
       client.emit('data', positions);
     });
   }
-
 }

@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { shareReplay } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
 
 import { WsSubscription } from './base/ws-subscription.class';
 
@@ -50,15 +50,35 @@ export class TickerService {
     return this.streams[instrument];
   }
 
-  getHistoricalData(instrument: string): Observable<TickerData[]> {
+  getHistoricalData(
+    instrument: string,
+    timespan: number = 1, // Minutes
+    interval: number = 1 // MS
+  ): Observable<TickerData[]> {
     return new Observable((subscriber) => {
       const stream = this.getSubscription(instrument);
       stream.once('get-instrument-history-data-' + instrument, (data) => {
         subscriber.next(data.map(this.getHistoricalDataMapper()));
         subscriber.complete();
       });
-      stream.send('get-instrument-history', { instrument });
+      stream.send('get-instrument-history', { instrument, timespan, interval });
     });
+  }
+
+  roundTimePipe(seconds: number) {
+    return map((data: TickerData[]) =>
+      data.map((d: TickerData) => {
+        return {
+          ...d,
+          data: [
+            {
+              ...d.data[0],
+              t: Math.floor(d.data[0].t / (1000 * seconds)) * (1000 * seconds),
+            },
+          ],
+        };
+      })
+    );
   }
 
   private getHistoricalDataMapper() {

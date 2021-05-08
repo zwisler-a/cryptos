@@ -10,26 +10,26 @@ import { ChartData } from 'src/app/types/chart-data.type';
 @Component({
   selector: 'app-wallet',
   template: ` <div class="card">
-    <app-value-chart
-      class="chart"
-      [rangeInMinutes]="chartRange"
-      [data]="totalBalance$"
-    ></app-value-chart>
     <div class="card-block">
-    <div class="btn-group">
-      <div class="radio btn btn-sm">
-        <input type="radio" checked name="radios" id="radio-1" />
-        <label for="radio-1" (click)="setTimespanMinutes()">Stunde</label>
+      <app-value-chart
+        class="chart"
+        [rangeInMinutes]="chartRange"
+        [data]="totalBalance$"
+      ></app-value-chart>
+      <div class="btn-group">
+        <div class="radio btn btn-sm">
+          <input type="radio" checked name="radios" id="radio-1" />
+          <label for="radio-1" (click)="setTimespanMinutes()">Stunde</label>
+        </div>
+        <div class="radio btn btn-sm">
+          <input type="radio" name="radios" id="radio-2" />
+          <label for="radio-2" (click)="setTimespanHours()">Tag</label>
+        </div>
+        <div class="radio btn btn-sm">
+          <input type="radio" name="radios" id="radio-3" />
+          <label for="radio-3" (click)="setTimespanMonth()">Monat</label>
+        </div>
       </div>
-      <div class="radio btn btn-sm">
-        <input type="radio" name="radios" id="radio-2" />
-        <label for="radio-2" (click)="setTimespanHours()">Tag</label>
-      </div>
-      <div class="radio btn btn-sm">
-        <input type="radio" name="radios" id="radio-3" />
-        <label for="radio-3" (click)="setTimespanMonth()">Monat</label>
-      </div>
-    </div>
     </div>
     <app-balance></app-balance>
   </div>`,
@@ -46,11 +46,11 @@ import { ChartData } from 'src/app/types/chart-data.type';
 export class WalletComponent implements OnInit {
   totalBalance$?: Observable<ChartData[]>;
   chartRange = 60;
-  constructor(private totalBalanceService: TotalBalanceService) {
-    this.setTimespanHours();
-  }
+  constructor(private totalBalanceService: TotalBalanceService) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.setTimespanMinutes();
+  }
 
   setTimespanMinutes() {
     this.totalBalance$ = concat(
@@ -65,7 +65,7 @@ export class WalletComponent implements OnInit {
       this.totalBalanceService.getHistoricalData(
         undefined,
         60 * 24, // Data of a day
-        1000 * 60 * 1 // 5 Minute interval
+        60 * 15 // 15 Minute interval
       ),
       this.totalBalanceService.stream$.pipe(map((d) => [d]))
     ).pipe(this.toChartValue());
@@ -75,8 +75,8 @@ export class WalletComponent implements OnInit {
     this.totalBalance$ = concat(
       this.totalBalanceService.getHistoricalData(
         undefined,
-        60 * 24, // Data of a month
-        1000 * 60 * 60 // 1 Hour interval
+        60 * 24 * 30, // Data of a month
+        60 * 60 * 2 // 4 Hour interval
       ),
       this.totalBalanceService.stream$.pipe(map((d) => [d]))
     ).pipe(this.toChartValue());

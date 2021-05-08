@@ -1,13 +1,8 @@
 import { Logger } from '@nestjs/common';
-import {
-  ConnectedSocket,
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
-} from '@nestjs/websockets';
-import { Subscription } from 'rxjs';
-import { Server, Socket } from 'socket.io';
+import { ConnectedSocket, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import { Socket } from 'socket.io';
 import { BalanceService } from 'src/service/balance.service';
+
 import { SubscriptionManager } from './subscription-manager.class';
 
 @WebSocketGateway({ namespace: 'wallet' })

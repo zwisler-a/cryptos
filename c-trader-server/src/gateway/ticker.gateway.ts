@@ -1,11 +1,5 @@
 import { Logger } from '@nestjs/common';
-import {
-  ConnectedSocket,
-  MessageBody,
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
-} from '@nestjs/websockets';
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Subscription } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { TickerTrackingService } from 'src/data-tracking/ticker-tracking.service';
@@ -55,12 +49,7 @@ export class TickerGateway {
     this.logger.debug(`Subscribe to Position Price ${body.instrument} ...`);
 
     this.tickerTrackingService
-      .getLastXMinutes(body.instrument, body.timespan || 60)
-      .pipe(
-        this.tickerTrackingService.filterForIntervalPipe(
-          body.inverval || 60000,
-        ),
-      )
+      .getLast(body.instrument, body.timespan || 60, 60)
       .subscribe((data) => {
         client.emit('get-instrument-history-data-' + body.instrument, data);
       });

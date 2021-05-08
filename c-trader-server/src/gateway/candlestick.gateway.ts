@@ -26,8 +26,8 @@ export class CandlestickGateway {
     );
     this.subscriptions[client.id] = this.cryptoService
       .subscribe(new SubscribeCandlestick(body.interval, body.instrument))
-      .subscribe((data) => { 
-        client.emit('candlestick-data', data); 
+      .subscribe((data) => {
+        client.emit('candlestick-data', data);
       });
   }
 
