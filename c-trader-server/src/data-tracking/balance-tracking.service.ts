@@ -8,7 +8,6 @@ import { PublicGetInstuments } from 'src/crypto/types/requests/get-instruments.p
 import { SubscribeTicker } from 'src/crypto/types/subscriptions/ticker.subscription';
 import { BalanceEntitiy } from 'src/entities/balance.entity';
 import { BalanceRepository } from 'src/entities/repos/balance.repository';
-import { Between } from 'typeorm';
 
 @Injectable()
 export class BalanceTrackingService {
@@ -23,6 +22,7 @@ export class BalanceTrackingService {
   constructor(
     private cryptoService: CryptoService,
     private balanceRepo: BalanceRepository,
+    
   ) {}
 
 

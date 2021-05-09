@@ -7,7 +7,7 @@ import { join } from 'path';
 
 import { AppController } from './app.controller';
 import { CryptoModule } from './crypto/crypto.module';
-import { DataTrackingModule } from './data-tracking/data-tracking.module';
+import { DataTrackingModule, tickerEntities } from './data-tracking/data-tracking.module';
 import { BalanceEntitiy } from './entities/balance.entity';
 import { PositionEntity } from './entities/position.entity';
 import { PositionRepository } from './entities/repos/position.repository';
@@ -38,7 +38,12 @@ import { TickerService } from './service/ticker.service';
       username: process.env.DATABASE_USER,
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_DB,
-      entities: [PositionEntity, BalanceEntitiy, TickerEntity],
+      entities: [
+        PositionEntity,
+        BalanceEntitiy,
+        TickerEntity,
+        ...tickerEntities,
+      ],
       synchronize: true,
     }),
     TypeOrmModule.forFeature([PositionRepository]),
@@ -55,7 +60,7 @@ import { TickerService } from './service/ticker.service';
     PositionService,
     BalanceService,
     TickerService,
-    TotalBalanceGateway
+    TotalBalanceGateway,
   ],
 })
 export class AppModule {}
