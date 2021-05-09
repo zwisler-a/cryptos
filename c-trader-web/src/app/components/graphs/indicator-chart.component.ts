@@ -1,44 +1,58 @@
-import { Component, ElementRef, Input, OnInit } from '@angular/core';
-import { createChart, IChartApi, ISeriesApi, UTCTimestamp } from 'lightweight-charts';
+import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import {
+  createChart,
+  IChartApi,
+  ISeriesApi,
+  UTCTimestamp,
+} from 'lightweight-charts';
 import { Observable, Subscription } from 'rxjs';
 import { ChartData } from 'src/app/types/chart-data.type';
 
 @Component({
   selector: 'app-indicator-chart',
-  template: `<div class="overlay"></div>`,
+  template: `<div
+    #chart
+    [ngClass]="{ hidden: loading, 'fade-in': !loading }"
+  ></div>`,
   styles: [
     `
-      .overlay {
-        background: linear-gradient(
-          90deg,
-          rgba(33, 33, 33, 1) 0%,
-          rgba(0, 0, 0, 0) 14%
-        );
+        .hidden {
+        opacity: 0;
+      }
       }
     `,
   ],
 })
 export class IndicatorChartComponent implements OnInit {
+  @ViewChild('chart', { static: true }) chartRef?: ElementRef<any>;
   private chart?: IChartApi;
   private areaSeries?: ISeriesApi<'Area'>;
+  loading = true;
 
   private dataSubscription?: Subscription;
 
   @Input() set data(val: Observable<ChartData[]>) {
-    if (this.dataSubscription) this.dataSubscription.unsubscribe();
-    val.subscribe(this.updateData.bind(this));
+    if (this.dataSubscription) {
+      this.dataSubscription.unsubscribe();
+    }
+    if (val) {
+      this.areaSeries?.setData([]);
+      this.loading = true;
+      this.dataSubscription = val.subscribe(this.updateData.bind(this));
+    }
   }
 
-  constructor(private ref: ElementRef) {}
+  constructor() {}
 
   private updateData(data: ChartData[]) {
+    this.loading = false;
     if (!this.chart) window.requestAnimationFrame(() => this.updateData(data));
     data.forEach((value) => this.areaSeries?.update(value));
-    this.setRange()
+    this.setRange();
   }
 
   ngOnInit(): void {
-    this.chart = createChart(this.ref.nativeElement, {
+    this.chart = createChart(this.chartRef?.nativeElement, {
       rightPriceScale: {
         visible: false,
       },

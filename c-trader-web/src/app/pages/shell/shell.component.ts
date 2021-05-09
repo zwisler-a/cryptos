@@ -6,8 +6,7 @@ import { Component, OnInit } from '@angular/core';
     <header class="header header-1">
       <div class="branding">
         <a href="javascript://" class="nav-link">
-          <cds-icon shape="namespace"></cds-icon>
-          <span class="title">Crypt<strong>OS</strong></span>
+          <img class="logo" src="/assets/logo_white_sm.png" />
         </a>
       </div>
       <div class="header-nav">
@@ -43,6 +42,10 @@ import { Component, OnInit } from '@angular/core';
     `
       .content {
         padding: 8px;
+      }
+      .logo {
+        height: 100%;
+        padding: 15px;
       }
     `,
   ],
