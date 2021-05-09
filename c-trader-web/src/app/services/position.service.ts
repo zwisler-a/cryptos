@@ -40,7 +40,7 @@ export class PositionService {
 
   tickerStream(instrument: string) {
     return concat(
-      this.tickerService.getHistoricalData(instrument, 60, 1 * 60 * 1000),
+      this.tickerService.getHistoricalData(instrument, 60, '1m'),
       this.tickerService.stream(instrument).pipe(map((d) => [d]))
     ).pipe(this.tickerService.roundTimePipe(60 * 1));
   }

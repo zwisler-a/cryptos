@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
 import { map, shareReplay } from 'rxjs/operators';
+import { Interval } from '../types/interval.type';
 
 import { WsSubscription } from './base/ws-subscription.class';
 
@@ -53,7 +54,7 @@ export class TickerService {
   getHistoricalData(
     instrument: string,
     timespan: number = 1, // Minutes
-    interval: number = 1 // MS
+    interval: Interval = '1m' // MS
   ): Observable<TickerData[]> {
     return new Observable((subscriber) => {
       const stream = this.getSubscription(instrument);

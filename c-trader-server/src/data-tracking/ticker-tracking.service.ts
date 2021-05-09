@@ -7,6 +7,7 @@ import { CryptoService } from 'src/crypto/crypto.service';
 import { SubscribeTicker } from 'src/crypto/types/subscriptions/ticker.subscription';
 import { TickerRepository } from 'src/entities/repos/ticker.repository';
 import { TickerEntity } from 'src/entities/ticker.entity';
+import { Interval } from 'src/types/interval.type';
 import { Between, Repository } from 'typeorm';
 
 import { FifteenMinutesTickerEntity } from './entities/ticker.15m.entity';
@@ -73,7 +74,7 @@ export class TickerTrackingService {
   getLast(
     instrument: string,
     minutes: number,
-    interval: '1m' | '5m' | '15m' | '30m' | '1h' | '1d',
+    interval: Interval,
   ): Observable<TickerEntity[]> {
     const now = new Date();
     const past = new Date(new Date().getTime() - minutes * 60 * 1000);
@@ -196,7 +197,7 @@ export class TickerTrackingService {
       .delete()
       .where('time < :time', { time: deadlineH })
       .execute();
-    this.fifteenMinutesTickerRepo
+    this.fiveMinutesTickerRepo
       .createQueryBuilder()
       .delete()
       .where('time < :time', { time: deadline4h })
@@ -204,7 +205,7 @@ export class TickerTrackingService {
     this.fifteenMinutesTickerRepo
       .createQueryBuilder()
       .delete()
-      .where('time < :time', { time: deadline4h })
+      .where('time < :time', { time: deadlineD })
       .execute();
     this.thityMinutesTickerRepo
       .createQueryBuilder()

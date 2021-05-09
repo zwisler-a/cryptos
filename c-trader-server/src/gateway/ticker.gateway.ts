@@ -10,6 +10,7 @@ import { Subscription } from 'rxjs';
 import { Server, Socket } from 'socket.io';
 import { TickerTrackingService } from 'src/data-tracking/ticker-tracking.service';
 import { TickerService } from 'src/service/ticker.service';
+import { Interval } from 'src/types/interval.type';
 
 @WebSocketGateway({ namespace: 'ticker' })
 export class TickerGateway {
@@ -49,13 +50,13 @@ export class TickerGateway {
   @SubscribeMessage('get-instrument-history')
   subscribePositionPrice(
     @MessageBody()
-    body: { instrument: string; timespan: number; inverval: number },
+    body: { instrument: string; timespan: number; interval: Interval },
     @ConnectedSocket() client: Socket,
   ) {
-    this.logger.debug(`Subscribe to Position Price ${body.instrument} ...`);
+    this.logger.debug(`Subscribe to Position Price ${body.instrument} - ${body.interval} - ${body.timespan} ...`);
     const start = new Date().getTime();
     this.tickerTrackingService
-      .getLast(body.instrument, body.timespan || 60, '1m')
+      .getLast(body.instrument, body.timespan || 60, body.interval)
       .subscribe((data) => {
         const duration = new Date().getTime() - start;
         this.logger.verbose(

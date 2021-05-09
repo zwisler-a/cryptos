@@ -69,7 +69,7 @@ export class PositionChartComponent implements OnInit {
       this.tickerService.getHistoricalData(
         this._instrument,
         60 * 24, // Data of a day
-        60 * 15 // 15 Minute interval
+        '15m' 
       ),
       this.tickerService.stream(this._instrument).pipe(map((d) => [d]))
     ).pipe(this.tickerService.roundTimePipe(60 * 15), this.toChartValue());
@@ -81,7 +81,7 @@ export class PositionChartComponent implements OnInit {
       this.tickerService.getHistoricalData(
         this._instrument,
         60 * 24 * 30, // Data of a month
-        60 * 60 * 2 // 2 Hour interval
+        '1h' 
       ),
       this.tickerService.stream(this._instrument).pipe(map((d) => [d]))
     ).pipe(this.tickerService.roundTimePipe(60 * 60 * 2), this.toChartValue());
