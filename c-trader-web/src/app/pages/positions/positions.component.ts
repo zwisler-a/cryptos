@@ -4,15 +4,11 @@ import { Router } from '@angular/router';
 @Component({
   selector: 'app-positions',
   template: `
-    <div class="card">
-      <div class="card-header">
-        Positions
+    <!-- <h1>Positions</h1> -->
 
-        <app-create-position></app-create-position>
-      </div>
+    <app-create-position></app-create-position>
 
-      <app-position-list (position)="viewPosition($event)"></app-position-list>
-    </div>
+    <app-position-list (position)="viewPosition($event)"></app-position-list>
   `,
   styles: [
     `

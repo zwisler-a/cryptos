@@ -54,14 +54,9 @@ export class TickerGateway {
     @ConnectedSocket() client: Socket,
   ) {
     this.logger.debug(`Subscribe to Position Price ${body.instrument} - ${body.interval} - ${body.timespan} ...`);
-    const start = new Date().getTime();
     this.tickerTrackingService
       .getLast(body.instrument, body.timespan || 60, body.interval)
       .subscribe((data) => {
-        const duration = new Date().getTime() - start;
-        this.logger.verbose(
-          `Historical data request took ${duration / 1000}s to execute`,
-        );
         client.emit('get-instrument-history-data-' + body.instrument, data);
       });
   }

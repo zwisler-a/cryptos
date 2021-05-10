@@ -8,7 +8,7 @@ import { ChartData } from '../types/chart-data.type';
 @Component({
   selector: 'app-position-list',
   template: `
-    <table class="table">
+    <!-- <table class="table">
       <thead>
         <tr>
           <th class="left">Instrument</th>
@@ -54,7 +54,47 @@ import { ChartData } from '../types/chart-data.type';
           </td>
         </tr>
       </tbody>
-    </table>
+    </table> -->
+
+    <clr-datagrid>
+      <clr-dg-column>Instrument</clr-dg-column>
+      <clr-dg-column>Quantity [Base]</clr-dg-column>
+      <clr-dg-column>Quantity [Quote]</clr-dg-column>
+      <clr-dg-column>Avg. Buy In</clr-dg-column>
+      <clr-dg-column>Change</clr-dg-column>
+      <clr-dg-column></clr-dg-column>
+      <clr-dg-column>Side</clr-dg-column>
+      <clr-dg-column></clr-dg-column>
+
+      <clr-dg-row *ngFor="let position of positions$ | async">
+        <clr-dg-cell>{{ position.instrument }}</clr-dg-cell>
+        <clr-dg-cell>{{ position.quantity }}</clr-dg-cell>
+        <clr-dg-cell>
+          {{ position.quantity * position.avgBuyIn | number: '1.0-10' }}
+        </clr-dg-cell>
+        <clr-dg-cell>{{ position.avgBuyIn | number: '1.0-10' }}</clr-dg-cell>
+        <clr-dg-cell>
+          <app-change-since
+            [instrument]="position.instrument"
+            [start]="position.avgBuyIn"
+            [direction]="position.side"
+          ></app-change-since>
+        </clr-dg-cell>
+        <clr-dg-cell>
+          <app-indicator-chart
+            [data]="position.tickerData"
+          ></app-indicator-chart>
+        </clr-dg-cell>
+        <clr-dg-cell>
+          <span [ngClass]="position.side">{{ position.side }}</span>
+        </clr-dg-cell>
+        <clr-dg-cell>
+          <button (click)="positionSelected(position.id)" class="btn btn-sm">
+            View
+          </button>
+        </clr-dg-cell>
+      </clr-dg-row>
+    </clr-datagrid>
   `,
   styles: [
     `

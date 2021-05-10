@@ -28,6 +28,11 @@ import { ChartData } from '../types/chart-data.type';
         display: flex;
         gap: 16px;
       }
+      @media screen and (max-width: 600px) {
+        app-indicator-chart {
+          display: none;
+        }
+      }
     `,
   ],
 })

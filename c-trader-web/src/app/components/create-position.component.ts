@@ -37,9 +37,13 @@ import { PositionService } from '../services/position.service';
       .create-position {
         display: flex;
         flex-direction: row;
+        flex-wrap: wrap;
         justify-content: flex-end;
         align-items: flex-end;
-        height: 25px;
+        gap: 8px;
+      }
+      .clr-form-control.clr-row {
+        margin-top: 0;
       }
       .btn {
         margin-bottom: 0;

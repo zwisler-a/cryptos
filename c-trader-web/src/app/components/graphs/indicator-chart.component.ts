@@ -48,7 +48,7 @@ export class IndicatorChartComponent implements OnInit {
     this.loading = false;
     if (!this.chart) window.requestAnimationFrame(() => this.updateData(data));
     data.forEach((value) => this.areaSeries?.update(value));
-    this.setRange();
+    if (data && data.length) this.setRange();
   }
 
   ngOnInit(): void {

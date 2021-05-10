@@ -26,7 +26,7 @@ import { TickerService } from './service/ticker.service';
 @Module({
   imports: [
     CryptoModule,
-    ConfigModule.forRoot(),
+    ConfigModule.forRoot({envFilePath: '.server.env'}),
     DataTrackingModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, 'client'),

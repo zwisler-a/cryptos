@@ -3,49 +3,49 @@ import { Component, OnInit } from '@angular/core';
 @Component({
   selector: 'app-shell',
   template: `
-    <header class="header header-1">
-      <div class="branding">
-        <a href="javascript://" class="nav-link">
-          <img class="logo" src="/assets/logo_white_sm.png" />
-        </a>
+    <clr-main-container>
+      <clr-header>
+        <div class="branding">
+          <a href="javascript://" class="nav-link">
+            <img class="logo" src="/assets/logo_white_sm.png" />
+          </a>
+        </div>
+        <div class="header-nav" [clr-nav-level]="1">
+          <a
+            routerLinkActive="active"
+            [routerLink]="'/positions'"
+            class="nav-link"
+            ><span class="nav-text">Positions</span></a
+          >
+          <a routerLinkActive="active" [routerLink]="'/wallet'" class="nav-link"
+            ><span class="nav-text">Wallet</span></a
+          >
+          <a routerLinkActive="active" [routerLink]="'/trades'" class="nav-link"
+            ><span class="nav-text">Trades</span></a
+          >
+        </div>
+        <div class="settings">
+          <app-wallet-indicator></app-wallet-indicator>
+        </div>
+      </clr-header>
+      <div class="content-container">
+        <main class="content-area">
+          <router-outlet></router-outlet>
+        </main>
       </div>
-      <div class="header-nav">
-        <a
-          routerLinkActive="active"
-          [routerLink]="'/positions'"
-          class="nav-link nav-text"
-          >Positions</a
-        >
-        <a
-          routerLinkActive="active"
-          [routerLink]="'/wallet'"
-          class="nav-link nav-text"
-          >Wallet</a
-        >
-        <a
-          routerLinkActive="active"
-          [routerLink]="'/trades'"
-          class="nav-link nav-text"
-          >Trades</a
-        >
-      </div>
-      <div class="header-actions">
-        <app-wallet-indicator></app-wallet-indicator>
-      </div>
-    </header>
-    <div class="content">
-      <router-outlet></router-outlet>
-      <div></div>
-    </div>
+    </clr-main-container>
   `,
   styles: [
     `
-      .content {
-        padding: 8px;
-      }
       .logo {
         height: 100%;
         padding: 15px;
+      }
+      .branding {
+        background: #333;
+      }
+      a.nav-link {
+        text-align: start !important;
       }
     `,
   ],
