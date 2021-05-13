@@ -14,18 +14,20 @@ import { ChartData } from 'src/app/types/chart-data.type';
       [rangeInMinutes]="chartRange"
       [data]="totalBalance$"
     ></app-value-chart>
-    <div class="btn-group">
-      <div class="radio btn btn-sm">
-        <input type="radio" checked name="radios" id="radio-1" />
-        <label for="radio-1" (click)="setTimespanMinutes()">Stunde</label>
-      </div>
-      <div class="radio btn btn-sm">
-        <input type="radio" name="radios" id="radio-2" />
-        <label for="radio-2" (click)="setTimespanHours()">Tag</label>
-      </div>
-      <div class="radio btn btn-sm">
-        <input type="radio" name="radios" id="radio-3" />
-        <label for="radio-3" (click)="setTimespanMonth()">Monat</label>
+    <div>
+      <div class="btn-group">
+        <div class="radio btn btn-sm">
+          <input type="radio" checked name="radios" id="radio-1" />
+          <label for="radio-1" (click)="setTimespanMinutes()">Stunde</label>
+        </div>
+        <div class="radio btn btn-sm">
+          <input type="radio" name="radios" id="radio-2" />
+          <label for="radio-2" (click)="setTimespanHours()">Tag</label>
+        </div>
+        <div class="radio btn btn-sm">
+          <input type="radio" name="radios" id="radio-3" />
+          <label for="radio-3" (click)="setTimespanMonth()">Monat</label>
+        </div>
       </div>
     </div>
     <app-balance></app-balance>`,

@@ -26,7 +26,7 @@ export class TotalBalanceService {
     interval: number = 1
   ): Observable<BalanceHistroyData[]> {
     return new Observable((subscriber) => {
-      this.wsSubscription.once('get-history-data-USDT_TOTAL', (data) => {
+      this.wsSubscription.once('get-history-data-' + currency, (data) => {
         subscriber.next(data);
         subscriber.complete();
       });
