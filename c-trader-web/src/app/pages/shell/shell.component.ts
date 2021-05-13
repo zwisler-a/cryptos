@@ -1,9 +1,24 @@
 import { Component, OnInit } from '@angular/core';
+import { SwUpdate } from '@angular/service-worker';
 
 @Component({
   selector: 'app-shell',
   template: `
     <clr-main-container>
+      <clr-alert
+        *ngIf="newVersionAvialable"
+        clrAlertType="success"
+        [clrAlertAppLevel]="true"
+      >
+        <clr-alert-item>
+          <div class="alert-text">
+            A new version is available. Would you like to reload?
+          </div>
+          <div class="alert-actions" (click)="reload()">
+            <button class="btn alert-action">Yes, please!</button>
+          </div>
+        </clr-alert-item>
+      </clr-alert>
       <clr-header>
         <div class="branding">
           <a href="javascript://" class="nav-link">
@@ -51,7 +66,14 @@ import { Component, OnInit } from '@angular/core';
   ],
 })
 export class ShellComponent implements OnInit {
-  constructor() {}
-
+  newVersionAvialable = false;
+  constructor(swUpdate: SwUpdate) {
+    swUpdate.available.subscribe((event) => {
+      this.newVersionAvialable = true;
+    });
+  }
   ngOnInit(): void {}
+  reload() {
+    window.location.reload();
+  }
 }

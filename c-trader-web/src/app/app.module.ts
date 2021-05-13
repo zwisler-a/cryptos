@@ -31,6 +31,10 @@ import { InstrumentService } from './services/instruments.service';
 import { TickerService } from './services/ticker.service';
 import { BlinkingDirective } from './shared/blinking.directive';
 import { PercentagePipe } from './shared/percentage.pipe';
+import { OrderListComponent } from './components/order-list.component';
+import { OrderService } from './services/order.service';
+import { ServiceWorkerModule } from '@angular/service-worker';
+import { environment } from '../environments/environment';
 
 ClarityIcons.addIcons(namespaceIcon, timesIcon);
 
@@ -56,6 +60,7 @@ ClarityIcons.addIcons(namespaceIcon, timesIcon);
     WalletIndicatorComponent,
     ValueChartComponent,
     PositionChartComponent,
+    OrderListComponent,
   ],
   imports: [
     BrowserModule,
@@ -64,12 +69,19 @@ ClarityIcons.addIcons(namespaceIcon, timesIcon);
     ClarityModule,
     BrowserAnimationsModule,
     LoggerModule.forRoot({ level: NgxLoggerLevel.DEBUG }),
+    ServiceWorkerModule.register('ngsw-worker.js', {
+      enabled: environment.production,
+      // Register the ServiceWorker as soon as the app is stable
+      // or after 30 seconds (whichever comes first).
+      registrationStrategy: 'registerWhenStable:30000'
+    }),
   ],
   providers: [
     TickerService,
     InstrumentService,
     BalanceService,
     CandlestickService,
+    OrderService
   ],
   bootstrap: [AppComponent],
 })
