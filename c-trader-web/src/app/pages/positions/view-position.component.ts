@@ -26,7 +26,7 @@ import { ChartData } from 'src/app/types/chart-data.type';
       <div class="card-block">
         <div class="card-text"></div>
         <app-position-chart
-          [instrument]="position.instrument"
+          [position]="position"
         ></app-position-chart>
         <div class="card-text">
           <app-buy-form

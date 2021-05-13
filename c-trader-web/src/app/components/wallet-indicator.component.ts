@@ -28,6 +28,7 @@ import { ChartData } from '../types/chart-data.type';
       <app-indicator-chart
         *ngIf="totalBalance$"
         [data]="totalBalance$"
+        [range]="range"
       ></app-indicator-chart>
       <span class="ts-indicator">{{ currentDisplay }}</span>
     </div>
@@ -71,6 +72,7 @@ export class WalletIndicatorComponent implements OnInit {
   totalBalance$?: Observable<ChartData[]>;
   balance$?: Observable<any>;
   currentDisplay = 'h';
+  range = 60;
 
   constructor(private totalBalanceService: TotalBalanceService) {}
 
@@ -99,6 +101,7 @@ export class WalletIndicatorComponent implements OnInit {
       this.totalBalanceService.stream$.pipe(map((d) => [d]))
     ).pipe(this.toChartValue());
     this.balance$ = this.totalBalance$.pipe(this.balancePipe(60));
+    this.range = 60;
   }
 
   private dayData() {
@@ -107,6 +110,7 @@ export class WalletIndicatorComponent implements OnInit {
       this.totalBalanceService.stream$.pipe(map((d) => [d]))
     ).pipe(this.toChartValue());
     this.balance$ = this.totalBalance$.pipe(this.balancePipe(48));
+    this.range = 1440;
   }
 
   private monthData() {
@@ -115,6 +119,7 @@ export class WalletIndicatorComponent implements OnInit {
       this.totalBalanceService.stream$.pipe(map((d) => [d]))
     ).pipe(this.toChartValue());
     this.balance$ = this.totalBalance$.pipe(this.balancePipe(60));
+    this.range = 43200;
   }
 
   private toChartValue() {

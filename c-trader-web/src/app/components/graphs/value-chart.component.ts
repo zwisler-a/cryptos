@@ -1,5 +1,13 @@
+import { ReturnStatement } from '@angular/compiler';
 import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
-import { createChart, IChartApi, ISeriesApi, UTCTimestamp } from 'lightweight-charts';
+import {
+  createChart,
+  IChartApi,
+  IPriceLine,
+  ISeriesApi,
+  PriceLineOptions,
+  UTCTimestamp,
+} from 'lightweight-charts';
 import { Observable, Subscription } from 'rxjs';
 import { ChartData } from 'src/app/types/chart-data.type';
 
@@ -37,8 +45,11 @@ export class ValueChartComponent implements OnInit {
   private areaSeries?: ISeriesApi<'Area'>;
   loading = true;
   private dataSubscription?: Subscription;
+  private createdLines: IPriceLine[] = [];
 
   @Input() rangeInMinutes = 60;
+  @Input() decimalPlaces: number = 2;
+  @Input() lines: PriceLineOptions[] = [];
 
   @Input() set data(val: Observable<ChartData[]> | undefined) {
     if (this.dataSubscription) {
@@ -58,6 +69,16 @@ export class ValueChartComponent implements OnInit {
     if (!this.chart) window.requestAnimationFrame(() => this.updateData(data));
     data.forEach((value) => this.areaSeries?.update(value));
     this.setRange();
+    this.updateLines();
+  }
+
+  private updateLines() {
+    if (!this.areaSeries) return;
+    const series = this.areaSeries;
+    this.createdLines.forEach((line) => series.removePriceLine(line));
+    this.createdLines = this.lines.map((line) => {
+      return series.createPriceLine(line);
+    });
   }
 
   ngOnInit(): void {
@@ -68,13 +89,18 @@ export class ValueChartComponent implements OnInit {
       width: this.ref.nativeElement.width,
       height: 200,
       handleScroll: false,
-      handleScale: false,
+      // handleScale: false,
       timeScale: {
         timeVisible: true,
         secondsVisible: true,
       },
     });
-    this.areaSeries = this.chart.addAreaSeries();
+    this.areaSeries = this.chart.addAreaSeries({
+      priceFormat: {
+        precision: this.decimalPlaces,
+        minMove: 1 / Math.pow(10, this.decimalPlaces),
+      },
+    });
   }
 
   private setRange() {

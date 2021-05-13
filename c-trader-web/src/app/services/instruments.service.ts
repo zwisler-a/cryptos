@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { shareReplay } from 'rxjs/operators';
+import { map, shareReplay } from 'rxjs/operators';
 
 import { WsSubscription } from './base/ws-subscription.class';
 
@@ -23,5 +23,15 @@ export class InstrumentService {
 
   stream(): Observable<InstrumentData[]> {
     return this.wsSubscription.data$.pipe(shareReplay(1));
+  }
+
+  get(instrument_name: string) {
+    return this.stream().pipe(
+      map((instruments) =>
+        instruments.find(
+          (instrument) => instrument.instrument_name === instrument_name
+        )
+      )
+    );
   }
 }
