@@ -14,6 +14,7 @@ import { PositionRepository } from './entities/repos/position.repository';
 import { TickerEntity } from './entities/ticker.entity';
 import { CandlestickGateway } from './gateway/candlestick.gateway';
 import { InstrumentGateway } from './gateway/instrument.gateway';
+import { OrderGateway } from './gateway/order.gateway';
 import { PositionGateway } from './gateway/position.gateway';
 import { TickerGateway } from './gateway/ticker.gateway';
 import { TotalBalanceGateway } from './gateway/total-balance.gateway';
@@ -54,6 +55,7 @@ import { TickerService } from './service/ticker.service';
     TickerGateway,
     BalanceGateway,
     InstrumentGateway,
+    OrderGateway,
     TradesGateway,
     PositionGateway,
     CandlestickGateway,

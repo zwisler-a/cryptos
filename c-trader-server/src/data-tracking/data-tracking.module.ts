@@ -12,6 +12,7 @@ import { HourTickerEntity } from './entities/ticker.1h.entity';
 import { MinuteTickerEntity } from './entities/ticker.1m.entity';
 import { ThrityMinutesTickerEntity } from './entities/ticker.30m.entity';
 import { FiveMinutesTickerEntity } from './entities/ticker.5m.entity';
+import { OrderTrackingService } from './order-tracking.service';
 import { TickerTrackingService } from './ticker-tracking.service';
 
 export const tickerEntities = [
@@ -33,7 +34,7 @@ export const tickerEntities = [
     ]),
     CryptoModule,
   ],
-  providers: [BalanceTrackingService, TickerTrackingService],
-  exports: [BalanceTrackingService, TickerTrackingService],
+  providers: [BalanceTrackingService, TickerTrackingService, OrderTrackingService],
+  exports: [BalanceTrackingService, TickerTrackingService, OrderTrackingService],
 })
 export class DataTrackingModule {}

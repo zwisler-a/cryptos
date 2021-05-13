@@ -90,8 +90,8 @@ export class WalletIndicatorComponent implements OnInit {
   }
 
   private setDisplay() {
-    if (this.currentDisplay === 'h') this.dayData();
-    if (this.currentDisplay === 'd') this.hourData();
+    if (this.currentDisplay === 'h') this.hourData();
+    if (this.currentDisplay === 'd') this.dayData();
     if (this.currentDisplay === 'm') this.monthData();
   }
 
@@ -100,7 +100,9 @@ export class WalletIndicatorComponent implements OnInit {
       this.totalBalanceService.getHistoricalData(),
       this.totalBalanceService.stream$.pipe(map((d) => [d]))
     ).pipe(this.toChartValue());
-    this.balance$ = this.totalBalance$.pipe(this.balancePipe(60));
+    this.balance$ = this.totalBalance$.pipe(
+      this.balancePipe(59)
+    );
     this.range = 60;
   }
 

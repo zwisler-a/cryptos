@@ -40,7 +40,7 @@ export class TotalBalanceGateway extends SubscriptionManager {
     body: { currency: string; timespan: number; interval: number },
     @ConnectedSocket() client: Socket,
   ) {
-    this.logger.debug(`Subscribe Balance Currency ${body.currency} ...`);
+    this.logger.debug(`Get Balance History for ${body.currency} ...`);
 
     this.balanceTrackingService
       .getLast(body.currency, body.timespan || 60, body.interval || 1)
