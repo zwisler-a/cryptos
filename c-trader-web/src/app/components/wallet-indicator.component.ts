@@ -28,7 +28,7 @@ import { ChartData } from '../types/chart-data.type';
       <app-indicator-chart
         *ngIf="totalBalance$"
         [data]="totalBalance$"
-        [range]="range"
+        [rangeInMinutes]="range"
       ></app-indicator-chart>
       <span class="ts-indicator">{{ currentDisplay }}</span>
     </div>
@@ -96,32 +96,30 @@ export class WalletIndicatorComponent implements OnInit {
   }
 
   private hourData() {
+    this.range = 60;
     this.totalBalance$ = concat(
       this.totalBalanceService.getHistoricalData(),
       this.totalBalanceService.stream$.pipe(map((d) => [d]))
     ).pipe(this.toChartValue());
-    this.balance$ = this.totalBalance$.pipe(
-      this.balancePipe(59)
-    );
-    this.range = 60;
+    this.balance$ = this.totalBalance$.pipe(this.balancePipe(60));
   }
 
   private dayData() {
-    this.totalBalance$ = concat(
-      this.totalBalanceService.getHistoricalData(undefined, 1440, 30),
-      this.totalBalanceService.stream$.pipe(map((d) => [d]))
-    ).pipe(this.toChartValue());
-    this.balance$ = this.totalBalance$.pipe(this.balancePipe(48));
     this.range = 1440;
-  }
-
-  private monthData() {
     this.totalBalance$ = concat(
-      this.totalBalanceService.getHistoricalData(undefined, 43200, 720),
+      this.totalBalanceService.getHistoricalData(undefined, 1440, 24 * 60),
       this.totalBalanceService.stream$.pipe(map((d) => [d]))
     ).pipe(this.toChartValue());
     this.balance$ = this.totalBalance$.pipe(this.balancePipe(60));
+  }
+
+  private monthData() {
     this.range = 43200;
+    this.totalBalance$ = concat(
+      this.totalBalanceService.getHistoricalData(undefined, 43200, 720 * 60),
+      this.totalBalanceService.stream$.pipe(map((d) => [d]))
+    ).pipe(this.toChartValue());
+    this.balance$ = this.totalBalance$.pipe(this.balancePipe(60));
   }
 
   private toChartValue() {

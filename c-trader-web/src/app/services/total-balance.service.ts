@@ -23,14 +23,14 @@ export class TotalBalanceService {
   getHistoricalData(
     currency: string = 'USDT_TOTAL',
     timespan: number = 60,
-    interval: number = 1
+    intervalInSeconds: number = 1
   ): Observable<BalanceHistroyData[]> {
     return new Observable((subscriber) => {
       this.wsSubscription.once('get-history-data-' + currency, (data) => {
         subscriber.next(data);
         subscriber.complete();
       });
-      this.wsSubscription.send('get-history', { currency, timespan, interval });
+      this.wsSubscription.send('get-history', { currency, timespan, interval: intervalInSeconds });
     });
   }
 }

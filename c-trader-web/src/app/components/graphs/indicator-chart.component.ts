@@ -31,7 +31,7 @@ export class IndicatorChartComponent implements OnInit {
 
   private dataSubscription?: Subscription;
 
-  @Input() range = 60;
+  @Input() rangeInMinutes = 60;
   @Input() set data(val: Observable<ChartData[]>) {
     if (this.dataSubscription) {
       this.dataSubscription.unsubscribe();
@@ -49,7 +49,7 @@ export class IndicatorChartComponent implements OnInit {
     this.loading = false;
     if (!this.chart) window.requestAnimationFrame(() => this.updateData(data));
     data.forEach((value) => this.areaSeries?.update(value));
-    if (data && data.length) this.setRange(this.range);
+    if (data && data.length) this.setRange();
   }
 
   ngOnInit(): void {
@@ -77,9 +77,10 @@ export class IndicatorChartComponent implements OnInit {
       .applyOptions({ scaleMargins: { bottom: 0.01, top: 0.01 } });
   }
 
-  private setRange(inMinutes = 60) {
+  private setRange() {
     this.chart?.timeScale().setVisibleRange({
-      from: (new Date().getTime() / 1000 - 60 * inMinutes) as UTCTimestamp,
+      from: (new Date().getTime() / 1000 -
+        this.rangeInMinutes * 60) as UTCTimestamp,
       to: (new Date().getTime() / 1000) as UTCTimestamp,
     });
   }
