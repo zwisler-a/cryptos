@@ -1,47 +1,81 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
-import { Observable } from 'rxjs';
-import { first, map } from 'rxjs/operators';
+import { combineLatest, Observable } from 'rxjs';
+import { filter, first, map, mergeMap } from 'rxjs/operators';
 
-import { BalanceService } from '../services/balance.service';
+import { BalanceData, BalanceService } from '../services/balance.service';
 import {
   InstrumentData,
   InstrumentService,
 } from '../services/instruments.service';
 import { TickerDataValues, TickerService } from '../services/ticker.service';
 
+type FormData = [
+  TickerDataValues,
+  {
+    base: {
+      value: number | undefined;
+      currency: string | undefined;
+      decimals: number;
+      decimal_str: string;
+    };
+    quote: {
+      value: number | undefined;
+      currency: string | undefined;
+      decimals: number;
+      decimal_str: string;
+    };
+  }
+];
 @Component({
   selector: 'app-buy-form',
   template: `
-    <form clrForm *ngIf="tickerData">
-      <p *ngIf="balance$ | async as balance" class="balance">
-        <span class="base">{{ balance.base }} {{ base_currenty }}</span>
-        <span class="quote">{{ balance.quote }} {{ quote_currenty }}</span>
-      </p>
+    <form clrForm *ngIf="data$ | async as data">
       <clr-input-container>
-        <label>Preis ({{ base_currenty }})</label>
+        <label>Preis ({{ data[1].quote.currency }})</label>
         <input
-          [(ngModel)]="tickerData.a"
+          [(ngModel)]="data[0].a"
           disabled
           name="price"
           clrInput
-          [placeholder]="base_currenty"
+          [placeholder]="data[1].base.currency"
           type="number"
         />
       </clr-input-container>
 
       <clr-input-container>
-        <label>Bid ({{ quote_currenty }})</label>
+        <label>Bid ({{ data[1].quote.currency }})</label>
         <input
           [(ngModel)]="bid"
+          (input)="updateBid()"
           name="bid"
           clrInput
-          [placeholder]="quote_currenty"
+          [placeholder]="data[1].quote.currency"
           type="number"
         />
+        <clr-control-helper
+          >{{ data[1].quote.value | number: data[1].quote.decimal_str }}
+          {{ data[1].quote.currency }}</clr-control-helper
+        >
       </clr-input-container>
-
+      <clr-button-group class="preselect">
+        <clr-button
+          class="btn-sm"
+          (click)="selectPercent(data[1].quote.value, 25)"
+          >25%</clr-button
+        >
+        <clr-button
+          class="btn-sm"
+          (click)="selectPercent(data[1].quote.value, 50)"
+          >50%</clr-button
+        >
+        <clr-button
+          class="btn-sm"
+          (click)="selectPercent(data[1].quote.value, 75)"
+          >75%</clr-button
+        >
+      </clr-button-group>
       <clr-input-container>
-        <label>Volume ({{ base_currenty }})</label>
+        <label class="result">= ({{ data[1].base.currency }})</label>
         <input
           [(ngModel)]="volume"
           name="volume"
@@ -49,9 +83,18 @@ import { TickerDataValues, TickerService } from '../services/ticker.service';
           placeholder="Volume"
           type="number"
         />
+        <clr-control-helper
+          >{{ data[1].base.value | number: data[1].base.decimal_str }}
+          {{ data[1].base.currency }}</clr-control-helper
+        >
       </clr-input-container>
       <div class="actions">
-        <button class="btn btn-success" type="submit" (click)="submit()">
+        <button
+          [clrLoading]="loading"
+          class="btn btn-success"
+          type="submit"
+          (click)="submit()"
+        >
           Order ausführen
         </button>
       </div>
@@ -59,6 +102,9 @@ import { TickerDataValues, TickerService } from '../services/ticker.service';
   `,
   styles: [
     `
+      .preselect {
+        margin: 16px auto 0 0;
+      }
       .balance .base {
         display: inline-block;
         width: 180px;
@@ -66,47 +112,44 @@ import { TickerDataValues, TickerService } from '../services/ticker.service';
       .actions {
         margin-top: 24px;
       }
+      .result {
+        text-align: right;
+      }
     `,
   ],
 })
 export class BuyFormComponent implements OnInit {
+  @Input() loading = false;
+  data$?: Observable<FormData>;
+
   @Input() set instrument(val: string) {
-    this._instrument = val;
-    this.base_currenty = val.split('_')[0];
-    this.quote_currenty = val.split('_')[1];
-    this.subscriptions();
+    console.log(val);
+    this.subscribeToDataFor(val);
   }
   @Output() order = new EventEmitter<{ price: number }>();
 
-  private _instrument: string = '';
-  instrumentData: InstrumentData | undefined;
-  base_currenty = 'CRO';
-  quote_currenty = 'ETH';
-  tickerData: TickerDataValues | null = null;
-  balance$: Observable<{
-    base: number | undefined;
-    quote: number | undefined;
-  }> | null = null;
+  bid: number = 0;
+  volume: number = 0;
 
-  private _bid = 0;
-  set bid(val: number) {
-    if (this.tickerData)
-      this._volume = this.toFixed(val / this.tickerData.a, 'quantity');
-    this._bid = val;
-  }
-  get bid() {
-    return this._bid;
-  }
+  // private _bid = 0;
+  // set bid(val: number) {
+  //   if (this.tickerData)
+  //     this._volume = this.toFixed(val / this.tickerData.a, 'quantity');
+  //   this._bid = val;
+  // }
+  // get bid() {
+  //   return this._bid;
+  // }
 
-  private _volume = 0;
-  set volume(val: number) {
-    if (this.tickerData)
-      this._bid = this.toFixed(val * this.tickerData.a, 'price');
-    this._volume = val;
-  }
-  get volume() {
-    return this._volume;
-  }
+  // private _volume = 0;
+  // set volume(val: number) {
+  //   if (this.tickerData)
+  //     this._bid = this.toFixed(val * this.tickerData.a, 'price');
+  //   this._volume = val;
+  // }
+  // get volume() {
+  //   return this._volume;
+  // }
 
   constructor(
     private tickerService: TickerService,
@@ -115,49 +158,91 @@ export class BuyFormComponent implements OnInit {
   ) {}
 
   submit() {
-    if (!this.instrumentData)
-      return console.error('unknown instrument on', this._instrument);
-    this.order.emit({
-      price: Number.parseFloat(
-        this.bid.toFixed(this.instrumentData.price_decimals)
-      ),
+    this.data$?.pipe(first()).subscribe((data) => {
+      this.order.emit({
+        price: Number.parseFloat(this.bid.toFixed(data[1].quote.decimals)),
+      });
     });
   }
 
   ngOnInit(): void {}
 
-  private subscriptions() {
-    this.tickerService
-      .stream(this._instrument)
-      .pipe(map((val) => val.data[0]))
-      .subscribe((data) => (this.tickerData = data));
-    this.balance$ = this.balanceService.stream().pipe(
-      map((wallets) => ({
-        base: wallets.find((wallet) => wallet.currency === this.base_currenty),
-        quote: wallets.find(
-          (wallet) => wallet.currency === this.quote_currenty
-        ),
-      })),
-      map((walltes) => ({
-        base: walltes.base?.available,
-        quote: walltes.quote?.available,
-      }))
-    );
-    this.instrumentService
-      .stream()
-      .pipe(
-        first(),
-        map((instruments) =>
-          instruments.find((inst) => inst.instrument_name === this._instrument)
-        )
-      )
-      .subscribe((instrument) => (this.instrumentData = instrument));
+  updateBid() {
+    this.data$?.pipe(first()).subscribe((data) => {
+      this.volume = this.bid / data[0].a;
+    });
+  }
+
+  selectPercent(balance: number = 0, percent: number) {
+    this.bid = (balance / 100) * percent;
+    this.updateBid();
+  }
+
+  private subscribeToDataFor(instument: string) {
+    const base_currenty = instument.split('_')[0];
+    const quote_currenty = instument.split('_')[1];
+    this.data$ = combineLatest([
+      this.tickerService.stream(instument).pipe(map((val) => val.data[0])),
+      this.balanceService
+        .stream()
+        .pipe(this.selectBalances(quote_currenty, base_currenty)),
+    ]);
   }
 
   private toFixed(val: number, what: 'quantity' | 'price') {
-    const decimals = this.instrumentData
-      ? (this.instrumentData as any)[what + '_decimals'] || 20
-      : 20;
-    return Number.parseFloat(val.toFixed(decimals));
+    // const decimals = this.instrumentData
+    //   ? (this.instrumentData as any)[what + '_decimals'] || 20
+    //   : 20;
+    // return Number.parseFloat(val.toFixed(decimals));
+  }
+
+  private selectInstrument(instrument: string) {
+    return (source$: Observable<InstrumentData[]>) =>
+      source$.pipe(
+        first(),
+        map((instruments) =>
+          instruments.find((inst) => inst.instrument_name === instrument)
+        )
+      );
+  }
+
+  private selectBalances(quote: string, base: string) {
+    return (source$: Observable<BalanceData[]>) =>
+      source$.pipe(
+        map((wallets) => ({
+          base: wallets.find((wallet) => wallet.currency === base),
+          quote: wallets.find((wallet) => wallet.currency === quote),
+        })),
+        map((walltes) => ({
+          base: {
+            value: walltes.base?.available,
+            currency: walltes.base?.currency,
+          },
+          quote: {
+            value: walltes.quote?.available,
+            currency: walltes.quote?.currency,
+          },
+        })),
+        mergeMap((data) =>
+          this.instrumentService.get(`${base}_${quote}`).pipe(
+            map((inst) => {
+              return {
+                base: {
+                  ...data.base,
+                  decimals: inst?.quantity_decimals,
+                  decimal_str: `1.${inst?.quantity_decimals}-${inst?.quantity_decimals}`,
+                },
+                quote: {
+                  ...data.quote,
+                  decimals: inst?.price_decimals,
+                  decimal_str: `1.${inst?.price_decimals}-${inst?.price_decimals}`,
+                },
+              };
+            }),
+            // map(res => ({base: res.quote, quote: res.base})),
+            filter<any>((a) => a != undefined)
+          )
+        )
+      );
   }
 }

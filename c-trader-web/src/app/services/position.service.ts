@@ -50,7 +50,13 @@ export class PositionService {
   }
 
   buyInPosition(id: string, price: number) {
-    this.wsSubscription.send('buy-in', { id, price });
+    return new Observable((subscriber) => {
+      this.wsSubscription.once('buy-in-data-' + id, (data) => {
+        subscriber.next(data);
+        subscriber.complete();
+      });
+      this.wsSubscription.send('buy-in', { id, price });
+    });
   }
 
   closePosition(id: string) {

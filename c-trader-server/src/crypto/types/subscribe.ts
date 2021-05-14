@@ -34,6 +34,9 @@ export class SubscriptionData<T> extends CryptoBaseResponse {
   ): res is SubscriptionData<any> {
     const possibleSub = res as SubscriptionData<any>;
     const possibleRes = res as CryptoResponse;
-    return possibleRes.id === undefined && possibleSub.method === 'subscribe';
+    return (
+      (possibleRes.id === undefined || possibleRes.id === -1) &&
+      possibleSub.method === 'subscribe'
+    );
   }
 }

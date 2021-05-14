@@ -53,7 +53,7 @@ export class PieChartComponent implements OnInit, OnChanges {
             offset: 5,
           },
         },
-        layout: { padding: 80 },
+        layout: { padding: 85 },
         responsive: true,
       },
 

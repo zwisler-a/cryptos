@@ -2,8 +2,14 @@ import { Injectable, Logger } from '@nestjs/common';
 import { Observable, ReplaySubject, Subscriber, timer } from 'rxjs';
 import { delayWhen, map, mergeMap, retryWhen, tap } from 'rxjs/operators';
 import { CryptoService } from 'src/crypto/crypto.service';
-import { PrivateCreateOrder, PrivateCreateOrderResponse } from 'src/crypto/types/requests/create-order.private';
-import { PrivateGetOrderDetails, PrivateGetOrderDetailsResponse } from 'src/crypto/types/requests/get-order-details.private';
+import {
+  PrivateCreateOrder,
+  PrivateCreateOrderResponse,
+} from 'src/crypto/types/requests/create-order.private';
+import {
+  PrivateGetOrderDetails,
+  PrivateGetOrderDetailsResponse,
+} from 'src/crypto/types/requests/get-order-details.private';
 import { PositionEntity } from 'src/entities/position.entity';
 import { PositionRepository } from 'src/entities/repos/position.repository';
 
@@ -119,17 +125,17 @@ export class PositionService {
     order: PrivateGetOrderDetailsResponse,
     position: PositionEntity,
   ) {
-    const sumPrice = order.result.trade_list.reduce(
-      (a, val) => (a += val.traded_price * val.traded_quantity),
-      0,
-    );
-    const sumQuantity = order.result.trade_list.reduce(
-      (a, val) => (a += val.traded_quantity),
+    const totalFee = order.result.trade_list.reduce(
+      (a, val) => (a += val.fee),
       0,
     );
 
-    const totalCost = sumPrice + position.avgBuyIn * position.quantity;
-    const totalQuant = position.quantity + sumQuantity;
+    const totalBoughtQuantity = order.result.order_info.cumulative_quantity - totalFee;
+
+    const totalCost =
+      position.avgBuyIn * position.quantity +
+      order.result.order_info.avg_price * totalBoughtQuantity;
+    const totalQuant = position.quantity + totalBoughtQuantity;
     const avgBuyIn = totalCost / totalQuant;
 
     position.avgBuyIn = avgBuyIn;

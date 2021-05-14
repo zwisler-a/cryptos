@@ -1,5 +1,11 @@
 import { Logger } from '@nestjs/common';
-import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import {
+  ConnectedSocket,
+  MessageBody,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { PositionService } from 'src/service/position.service';
 
@@ -26,7 +32,9 @@ export class PositionGateway {
     @MessageBody() body: { id: string; price: number },
     @ConnectedSocket() client: Socket,
   ) {
-    this.positionService.buyIn(body.id, body.price).subscribe();
+    this.positionService.buyIn(body.id, body.price).subscribe((res) => {
+      client.emit('buy-in-data-' + body.id, {});
+    });
   }
 
   @SubscribeMessage('close')

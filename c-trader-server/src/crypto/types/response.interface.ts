@@ -9,9 +9,10 @@ export class CryptoResponse extends CryptoBaseResponse {
   message?: string; //	(optional) For server or error messages
   original?: string; //	(optional) Original request as a string, for error cases
 
-  static isResponse(
-    res: CryptoBaseResponse | any,
-  ): res is CryptoResponse {
-    return (res as CryptoResponse).id !== undefined;
+  static isResponse(res: CryptoBaseResponse | any): res is CryptoResponse {
+    return (
+      (res as CryptoResponse).id !== undefined &&
+      (res as CryptoResponse).id != -1
+    );
   }
 }

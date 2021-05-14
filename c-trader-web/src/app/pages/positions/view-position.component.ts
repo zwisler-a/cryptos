@@ -30,6 +30,7 @@ import { ChartData } from 'src/app/types/chart-data.type';
         <div class="card-block">
           <div class="card-text">
             <app-buy-form
+            [loading]="loading"
               *ngIf="position.side == 'BUY'"
               (order)="buyIn(position, $event)"
               [instrument]="position.instrument"
@@ -76,6 +77,7 @@ import { ChartData } from 'src/app/types/chart-data.type';
 })
 export class ViewPositionComponent implements OnInit {
   position$: Observable<any>;
+  loading = false;
   constructor(
     private positionService: PositionService,
     private activatedRoute: ActivatedRoute,
@@ -107,7 +109,12 @@ export class ViewPositionComponent implements OnInit {
   ngOnInit(): void {}
 
   buyIn(position: PositionData, event: { price: number }) {
-    this.positionService.buyInPosition(position.id, event.price);
+    this.loading = true;
+    this.positionService
+      .buyInPosition(position.id, event.price)
+      .subscribe(() => {
+        this.loading = false;
+      });
   }
 
   closePosition(id: string) {

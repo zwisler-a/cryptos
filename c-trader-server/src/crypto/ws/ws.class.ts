@@ -75,7 +75,7 @@ export class CryptoWs {
     if (json.method === PublicHeartbeat.method)
       return this.handleHeartbeat(json);
 
-    if (json.id == -1) {
+    if (json.code !== 0) {
       return this.handleError(json);
     }
     this._onMessage$.next(json);

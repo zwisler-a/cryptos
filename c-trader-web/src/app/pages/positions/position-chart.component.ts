@@ -63,9 +63,9 @@ export class PositionChartComponent implements OnInit {
         color: 'red',
         lineWidth: 1,
         lineStyle: LineStyle.Solid,
-        axisLabelVisible: true,
+        axisLabelVisible: false,
         title: 'BuyIn',
-      },
+      } as PriceLineOptions,
     ];
   }
 

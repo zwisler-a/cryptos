@@ -2,7 +2,7 @@ import { Component, EventEmitter, OnInit, Output } from '@angular/core';
 import { map } from 'rxjs/operators';
 
 import { InstrumentService } from '../services/instruments.service';
-import { PositionService } from '../services/position.service';
+import { PositionData, PositionService } from '../services/position.service';
 import { ChartData } from '../types/chart-data.type';
 
 @Component({
@@ -11,27 +11,27 @@ import { ChartData } from '../types/chart-data.type';
     <clr-datagrid>
       <clr-dg-column>Instrument</clr-dg-column>
       <ng-container *ngIf="small">
-        <clr-dg-column>Quantity [Base]</clr-dg-column>
-        <clr-dg-column>Quantity [Quote]</clr-dg-column>
-        <clr-dg-column>Avg. Buy In</clr-dg-column>
+        <clr-dg-column class="right">Quantity</clr-dg-column>
+        <clr-dg-column class="right">Avg. Buy In</clr-dg-column>
       </ng-container>
-      <clr-dg-column>Change</clr-dg-column>
+      <clr-dg-column class="right">Change</clr-dg-column>
       <ng-container *ngIf="small">
         <clr-dg-column></clr-dg-column>
         <clr-dg-column>Side</clr-dg-column>
       </ng-container>
       <clr-dg-column></clr-dg-column>
 
-      <clr-dg-row *ngFor="let position of positions$ | async">
+      <clr-dg-row *ngFor="let position of positions$ | async; trackBy: trackBy">
         <clr-dg-cell>{{ position.instrument }}</clr-dg-cell>
         <ng-container *ngIf="small">
-          <clr-dg-cell>{{ position.quantity }}</clr-dg-cell>
-          <clr-dg-cell>
-            {{ position.quantity * position.avgBuyIn | number: '1.0-10' }}
-          </clr-dg-cell>
-          <clr-dg-cell>{{ position.avgBuyIn | number: '1.0-10' }}</clr-dg-cell>
+          <clr-dg-cell class="right">{{
+            position.quantity | number: (position.decimals | async)?.quantity
+          }}</clr-dg-cell>
+          <clr-dg-cell class="right">{{
+            position.avgBuyIn | number: (position.decimals | async)?.price
+          }}</clr-dg-cell>
         </ng-container>
-        <clr-dg-cell>
+        <clr-dg-cell class="right">
           <app-change-since
             [instrument]="position.instrument"
             [start]="position.avgBuyIn"
@@ -73,6 +73,9 @@ import { ChartData } from '../types/chart-data.type';
       .centered {
         justify-content: center;
       }
+      .right {
+        justify-content: flex-end;
+      }
     `,
   ],
 })
@@ -86,6 +89,7 @@ export class PositionListComponent implements OnInit {
       positions.map((position) => ({
         ...position,
         tickerData: this.getTickerData(position.instrument),
+        decimals: this.getDecimals(position.instrument),
       }))
     )
   );
@@ -114,5 +118,21 @@ export class PositionListComponent implements OnInit {
 
   positionSelected(id: string) {
     this.position.emit(id);
+  }
+
+  getDecimals(instrument: string) {
+    return this.instrumentService.get(instrument).pipe(
+      map((instrument) => {
+        if (!instrument) throw Error();
+        return {
+          price: `1.${instrument.price_decimals}-${instrument.price_decimals}`,
+          quantity: `1.${instrument.quantity_decimals}-${instrument.quantity_decimals}`,
+        };
+      })
+    );
+  }
+
+  trackBy(index: number, position: PositionData): number {
+    return index;
   }
 }
