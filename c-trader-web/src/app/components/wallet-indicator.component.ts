@@ -18,12 +18,12 @@ import { ChartData } from '../types/chart-data.type';
         [ngClass]="{ red: balance.changeAbs < 0 }"
       >
         <span class="indicator"
-          >{{ balance.changeAbs | number: '1.0-2' }}$</span
+          >{{ balance.changeAbs | number: '1.2-2' }}$</span
         >
         <span class="indicator"
-          >{{ balance.changePrc | number: '1.0-2' }}%</span
+          >{{ balance.changePrc | number: '1.2-2' }}%</span
         >
-        <span>{{ balance.current | number: '1.0-2' }}$</span>
+        <span>{{ balance.current | number: '1.2-2' }}$</span>
       </span>
       <app-indicator-chart
         *ngIf="showChart && totalBalance$"
@@ -51,6 +51,7 @@ import { ChartData } from '../types/chart-data.type';
         gap: 14px;
       }
       :host {
+        user-select: none;
         display: flex;
         align-items: center;
         justify-content: center;

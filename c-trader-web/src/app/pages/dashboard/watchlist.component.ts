@@ -58,7 +58,6 @@ export class WatchlistComponent implements OnInit {
   ngOnInit(): void {}
 
   private process(val: string[]) {
-    console.log(val);
     this.processedWatchList = val.map((inst) => {
       return {
         instrument_name: inst,

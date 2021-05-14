@@ -85,7 +85,6 @@ export class ShellComponent implements OnInit {
         } else {
           this.showIndicator = true;
         }
-        console.log();
       });
   }
   ngOnInit(): void {}

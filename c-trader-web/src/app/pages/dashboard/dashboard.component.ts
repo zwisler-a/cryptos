@@ -18,9 +18,12 @@ import { BalanceService } from 'src/app/services/balance.service';
         width: 100%;
         justify-content: center;
         margin-bottom: -32px;
+        margin-top: -32px;
         display: flex;
+        z-index: -1;
       }
       .wallet {
+        position: relative;
         padding: 0px 16px;
         background: #515151;
         color: white;

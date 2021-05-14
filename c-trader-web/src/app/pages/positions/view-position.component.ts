@@ -13,7 +13,9 @@ import { ChartData } from 'src/app/types/chart-data.type';
   template: `
     <ng-container *ngIf="position$ | async as position">
       <h1 class="card-header">
-        <cds-icon shape="times" [routerLink]="'..'"></cds-icon>
+        <button class="btn btn-icon" [routerLink]="'..'">
+          <cds-icon shape="times"></cds-icon>
+        </button>
         <app-stock-ticker [instrument]="position.instrument"></app-stock-ticker>
         <span [ngClass]="position.side">{{ position.side }}</span>
         <span style="flex:1 1 auto"></span>
@@ -49,12 +51,25 @@ import { ChartData } from 'src/app/types/chart-data.type';
   `,
   styles: [
     `
+      @media screen and (max-width: 600px) {
+        h1.card-header {
+          gap: 8px;
+          flex-wrap: wrap;
+          font-size: 10px;
+          font-weight: bold;
+          line-height: 14px;
+        }
+        app-change-since {
+          margin: 0 18px;
+        }
+      }
       .card-header {
         margin: 0;
         font-size: 18px;
         display: flex;
         align-items: center;
         gap: 8px;
+        border-bottom: none;
       }
     `,
   ],
