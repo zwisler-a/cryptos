@@ -1,5 +1,10 @@
 import { Logger } from '@nestjs/common';
-import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway } from '@nestjs/websockets';
+import {
+  ConnectedSocket,
+  MessageBody,
+  SubscribeMessage,
+  WebSocketGateway,
+} from '@nestjs/websockets';
 import { Socket } from 'socket.io';
 import { BalanceTrackingService } from 'src/data-tracking/balance-tracking.service';
 import { BalanceService } from 'src/service/balance.service';
@@ -47,5 +52,14 @@ export class TotalBalanceGateway extends SubscriptionManager {
       .subscribe((data) => {
         client.emit('get-history-data-' + body.currency, data);
       });
+  }
+
+  @SubscribeMessage('get-balance-percentages')
+  getBalanceInPercentages(@ConnectedSocket() client: Socket) {
+    this.logger.debug(`Get Balance in Percentages for ...`);
+
+    this.balanceTrackingService.getValuePercentagesOfWallet().then((data) => {
+      client.emit('get-balance-percentages-data', data);
+    });
   }
 }

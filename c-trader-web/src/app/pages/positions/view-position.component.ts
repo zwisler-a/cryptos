@@ -11,8 +11,8 @@ import { ChartData } from 'src/app/types/chart-data.type';
 @Component({
   selector: 'app-view-position',
   template: `
-    <div class="card" *ngIf="position$ | async as position">
-      <div class="card-header">
+    <ng-container *ngIf="position$ | async as position">
+      <h1 class="card-header">
         <cds-icon shape="times" [routerLink]="'..'"></cds-icon>
         <app-stock-ticker [instrument]="position.instrument"></app-stock-ticker>
         <span [ngClass]="position.side">{{ position.side }}</span>
@@ -22,35 +22,36 @@ import { ChartData } from 'src/app/types/chart-data.type';
           [instrument]="position.instrument"
           [direction]="position.side"
         ></app-change-since>
-      </div>
-      <div class="card-block">
-        <div class="card-text"></div>
-        <app-position-chart
-          [position]="position"
-        ></app-position-chart>
-        <div class="card-text">
-          <app-buy-form
-            *ngIf="position.side == 'BUY'"
-            (order)="buyIn(position, $event)"
-            [instrument]="position.instrument"
-          ></app-buy-form>
-          <app-sell-form
-            *ngIf="position.side == 'SELL'"
-            (order)="buyIn(position, $event)"
-            [instrument]="position.instrument"
-          ></app-sell-form>
+      </h1>
+      <app-position-chart [position]="position"></app-position-chart>
+      <div class="card">
+        <div class="card-block">
+          <div class="card-text">
+            <app-buy-form
+              *ngIf="position.side == 'BUY'"
+              (order)="buyIn(position, $event)"
+              [instrument]="position.instrument"
+            ></app-buy-form>
+            <app-sell-form
+              *ngIf="position.side == 'SELL'"
+              (order)="buyIn(position, $event)"
+              [instrument]="position.instrument"
+            ></app-sell-form>
+          </div>
+        </div>
+        <div class="card-footer">
+          <button class="btn" (click)="closePosition(position.id)">
+            Position auflösen
+          </button>
         </div>
       </div>
-      <div class="card-footer">
-        <button class="btn" (click)="closePosition(position.id)">
-          Position auflösen
-        </button>
-      </div>
-    </div>
+    </ng-container>
   `,
   styles: [
     `
       .card-header {
+        margin: 0;
+        font-size: 18px;
         display: flex;
         align-items: center;
         gap: 8px;

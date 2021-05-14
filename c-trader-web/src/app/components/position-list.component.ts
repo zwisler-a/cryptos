@@ -34,6 +34,7 @@ import { ChartData } from '../types/chart-data.type';
         </clr-dg-cell>
         <clr-dg-cell class="centered">
           <app-indicator-chart
+            [width]="250"
             [data]="position.tickerData"
           ></app-indicator-chart>
         </clr-dg-cell>

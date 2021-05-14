@@ -1,4 +1,11 @@
-import { Component, ElementRef, Input, OnInit, ViewChild } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  Input,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
 import {
   createChart,
   IChartApi,
@@ -16,14 +23,16 @@ import { ChartData } from 'src/app/types/chart-data.type';
   ></div>`,
   styles: [
     `
-        .hidden {
-        opacity: 0;
+      div {
+        min-width: 200px;
       }
+      .hidden {
+        opacity: 0;
       }
     `,
   ],
 })
-export class IndicatorChartComponent implements OnInit {
+export class IndicatorChartComponent implements OnInit, OnDestroy {
   @ViewChild('chart', { static: true }) chartRef?: ElementRef<any>;
   private chart?: IChartApi;
   private areaSeries?: ISeriesApi<'Area'>;
@@ -31,6 +40,7 @@ export class IndicatorChartComponent implements OnInit {
 
   private dataSubscription?: Subscription;
 
+  @Input() width?: number;
   @Input() rangeInMinutes = 60;
   @Input() set data(val: Observable<ChartData[]>) {
     if (this.dataSubscription) {
@@ -44,6 +54,11 @@ export class IndicatorChartComponent implements OnInit {
   }
 
   constructor() {}
+  ngOnDestroy(): void {
+    if (this.dataSubscription) {
+      this.dataSubscription.unsubscribe();
+    }
+  }
 
   private updateData(data: ChartData[]) {
     this.loading = false;
@@ -60,7 +75,7 @@ export class IndicatorChartComponent implements OnInit {
       layout: { backgroundColor: '#33333300' },
       timeScale: { visible: false },
       grid: { horzLines: { visible: false }, vertLines: { visible: false } },
-      width: 200,
+      width: this.width,
       height: 30,
       crosshair: {
         horzLine: { visible: false },

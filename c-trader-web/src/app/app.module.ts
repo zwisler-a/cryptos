@@ -35,6 +35,10 @@ import { OrderListComponent } from './components/order-list.component';
 import { OrderService } from './services/order.service';
 import { ServiceWorkerModule } from '@angular/service-worker';
 import { environment } from '../environments/environment';
+import { PieChartComponent } from './components/graphs/pie-chart.component';
+import { InvestmentPiechartComponent } from './components/investment-piechart.component';
+import { DashboardComponent } from './pages/dashboard/dashboard.component';
+import { WatchlistComponent } from './pages/dashboard/watchlist.component';
 
 ClarityIcons.addIcons(namespaceIcon, timesIcon);
 
@@ -61,6 +65,10 @@ ClarityIcons.addIcons(namespaceIcon, timesIcon);
     ValueChartComponent,
     PositionChartComponent,
     OrderListComponent,
+    PieChartComponent,
+    InvestmentPiechartComponent,
+    DashboardComponent,
+    WatchlistComponent,
   ],
   imports: [
     BrowserModule,

@@ -17,9 +17,22 @@ export interface BalanceData {
 })
 export class BalanceService {
   private wsSubscription = new WsSubscription<BalanceData[]>('wallet');
+  private wsSubBalance = new WsSubscription<BalanceData[]>('balance');
   private currentBalance: BalanceData[] = [];
 
   constructor() {}
+
+  getBalancePercentages(): Observable<
+    { currency: string; percentage: number }[]
+  > {
+    return new Observable((subscriber) => {
+      this.wsSubBalance.once('get-balance-percentages-data', (data) => {
+        subscriber.next(data);
+        subscriber.complete();
+      });
+      this.wsSubBalance.send('get-balance-percentages');
+    });
+  }
 
   stream(): Observable<BalanceData[]> {
     return this.wsSubscription.data$.pipe(

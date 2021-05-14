@@ -1,6 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { concat, from, Observable } from 'rxjs';
-import { bufferCount, flatMap, map, mergeMap, tap } from 'rxjs/operators';
+import { bufferCount, map, mergeMap } from 'rxjs/operators';
 
 import {
   BalanceHistroyData,
@@ -26,7 +26,7 @@ import { ChartData } from '../types/chart-data.type';
         <span>{{ balance.current | number: '1.0-2' }}$</span>
       </span>
       <app-indicator-chart
-        *ngIf="totalBalance$"
+        *ngIf="showChart && totalBalance$"
         [data]="totalBalance$"
         [rangeInMinutes]="range"
       ></app-indicator-chart>
@@ -44,7 +44,7 @@ import { ChartData } from '../types/chart-data.type';
         color: lime;
       }
       .red .indicator {
-        color: red;
+        color: #ff5858;
       }
       .balance {
         display: flex;
@@ -69,6 +69,8 @@ import { ChartData } from '../types/chart-data.type';
   ],
 })
 export class WalletIndicatorComponent implements OnInit {
+  @Input() showChart = false;
+
   totalBalance$?: Observable<ChartData[]>;
   balance$?: Observable<any>;
   currentDisplay = 'h';
@@ -98,25 +100,29 @@ export class WalletIndicatorComponent implements OnInit {
   private hourData() {
     this.range = 60;
     this.totalBalance$ = concat(
-      this.totalBalanceService.getHistoricalData(),
+      this.totalBalanceService.getHistoricalData().pipe(this.fillTo(60)),
       this.totalBalanceService.stream$.pipe(map((d) => [d]))
     ).pipe(this.toChartValue());
-    this.balance$ = this.totalBalance$.pipe(this.balancePipe(60));
+    this.balance$ = this.totalBalance$.pipe(this.balancePipe(59));
   }
 
   private dayData() {
     this.range = 1440;
     this.totalBalance$ = concat(
-      this.totalBalanceService.getHistoricalData(undefined, 1440, 24 * 60),
+      this.totalBalanceService
+        .getHistoricalData(undefined, 1440, 24 * 60)
+        .pipe(this.fillTo(60)),
       this.totalBalanceService.stream$.pipe(map((d) => [d]))
     ).pipe(this.toChartValue());
-    this.balance$ = this.totalBalance$.pipe(this.balancePipe(60));
+    this.balance$ = this.totalBalance$.pipe(this.balancePipe(59));
   }
 
   private monthData() {
     this.range = 43200;
     this.totalBalance$ = concat(
-      this.totalBalanceService.getHistoricalData(undefined, 43200, 720 * 60),
+      this.totalBalanceService
+        .getHistoricalData(undefined, 43200, 720 * 60)
+        .pipe(this.fillTo(60)),
       this.totalBalanceService.stream$.pipe(map((d) => [d]))
     ).pipe(this.toChartValue());
     this.balance$ = this.totalBalance$.pipe(this.balancePipe(60));
@@ -128,6 +134,22 @@ export class WalletIndicatorComponent implements OnInit {
         return ChartData.from(new Date(point.timestamp), point.value);
       });
     });
+  }
+
+  fillTo(size: number) {
+    return (source$: Observable<any>) =>
+      source$.pipe(
+        map((val) => {
+          val = [].concat(val);
+          if (val.length < size) {
+            const missing = size - val.length;
+            for (let i = 0; i < missing; i++) {
+              val.unshift(val[0]);
+            }
+          }
+          return val;
+        })
+      );
   }
 
   private balancePipe(timeFrameInMinutes = 60) {

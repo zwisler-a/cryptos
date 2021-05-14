@@ -20,6 +20,8 @@
     "@cds/core": "5.1.1",
     "@clr/angular": "5.1.1",
     "@clr/ui": "5.1.1",
+    "chart.js": "^3.2.1",
+    "chartjs-plugin-datalabels": "^2.0.0-beta.1",
     "lightweight-charts": "^3.3.0",
     "ngx-logger": "^4.2.1",
     "rxjs": "~6.6.0",

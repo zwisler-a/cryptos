@@ -1,5 +1,7 @@
 import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, ActivationEnd, Router } from '@angular/router';
 import { SwUpdate } from '@angular/service-worker';
+import { filter } from 'rxjs/operators';
 
 @Component({
   selector: 'app-shell',
@@ -26,6 +28,9 @@ import { SwUpdate } from '@angular/service-worker';
           </a>
         </div>
         <div class="header-nav" [clr-nav-level]="1">
+          <a routerLinkActive="active" [routerLink]="'/dash'" class="nav-link">
+            <span class="nav-text">Dashboard</span>
+          </a>
           <a
             routerLinkActive="active"
             [routerLink]="'/positions'"
@@ -39,7 +44,7 @@ import { SwUpdate } from '@angular/service-worker';
             ><span class="nav-text">Trades</span></a
           >
         </div>
-        <div class="settings">
+        <div class="settings" *ngIf="showIndicator">
           <app-wallet-indicator></app-wallet-indicator>
         </div>
       </clr-header>
@@ -67,10 +72,21 @@ import { SwUpdate } from '@angular/service-worker';
 })
 export class ShellComponent implements OnInit {
   newVersionAvialable = false;
-  constructor(swUpdate: SwUpdate) {
+  showIndicator: boolean = true;
+  constructor(swUpdate: SwUpdate, private router: Router) {
     swUpdate.available.subscribe((event) => {
       this.newVersionAvialable = true;
     });
+    this.router.events
+      .pipe(filter((r) => r instanceof ActivationEnd))
+      .subscribe((ev: any) => {
+        if (ev.snapshot.data['walletIndicator'] !== undefined) {
+          this.showIndicator = ev.snapshot.data['walletIndicator'];
+        } else {
+          this.showIndicator = true;
+        }
+        console.log();
+      });
   }
   ngOnInit(): void {}
   reload() {

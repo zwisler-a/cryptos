@@ -22,9 +22,40 @@ export class BalanceTrackingService {
   constructor(
     private cryptoService: CryptoService,
     private balanceRepo: BalanceRepository,
-    
   ) {}
 
+  async getValuePercentagesOfWallet() {
+    const currencies = await this.balanceRepo
+      .createQueryBuilder()
+      .select('currency')
+      .distinct(true)
+      .getRawMany();
+    const latestBalancesPromise = currencies.map((curr) => {
+      return this.balanceRepo.find({
+        where: { currency: curr.currency },
+        take: 1,
+        order: { timestamp: 'DESC' },
+      });
+    });
+    const latestBalances = (await Promise.all(latestBalancesPromise)).map(
+      (balance) => balance[0],
+    ).filter(d => d.currency !== 'USDT_TOTAL');
+    const total = latestBalances.reduce(
+      (totalValue, balance) => (totalValue += balance.value_in_usdt),
+      0,
+    );
+
+    // 100/total*abs
+    const perc = latestBalances.map((balance) => {
+      return {
+        currency: balance.currency,
+        percentage: (100 / total) * balance.value_in_usdt,
+        usdt: balance.value_in_usdt,
+        total,
+      };
+    });
+    return perc;
+  }
 
   getLast(
     currency: string,
