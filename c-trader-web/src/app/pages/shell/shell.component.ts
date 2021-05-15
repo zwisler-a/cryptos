@@ -54,6 +54,7 @@ import { filter } from 'rxjs/operators';
         </main>
       </div>
     </clr-main-container>
+    <div class="time">{{ date | date: 'hh:mm:ss': 'UTC' }}</div>
   `,
   styles: [
     `
@@ -67,10 +68,22 @@ import { filter } from 'rxjs/operators';
       a.nav-link {
         text-align: start !important;
       }
+      .time {
+        border-top-left-radius: 3px;
+        font-size: 10px;
+        line-height: 10px;
+        color: white;
+        padding: 4px 16px 4px 12px;
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        background: #333;
+      }
     `,
   ],
 })
 export class ShellComponent implements OnInit {
+  date = new Date();
   newVersionAvialable = false;
   showIndicator: boolean = true;
   constructor(swUpdate: SwUpdate, private router: Router) {
@@ -87,7 +100,9 @@ export class ShellComponent implements OnInit {
         }
       });
   }
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    setInterval(() => (this.date = new Date()), 1000);
+  }
   reload() {
     window.location.reload();
   }
