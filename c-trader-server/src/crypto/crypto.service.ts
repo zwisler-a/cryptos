@@ -1,13 +1,15 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Observable, Subject, Subscriber } from 'rxjs';
-import { finalize, share } from 'rxjs/operators';
-import { CryptoRequestService } from './crypto-request.service';
-import { CryptoSubsbscriptionService } from './crypto-subscription.service';
+import { Observable } from 'rxjs';
 
+import { CryptoRequestService } from './crypto-request.service';
+import { CryptoRestRequestService } from './crypto-rest.service';
+import { CryptoSubsbscriptionService } from './crypto-subscription.service';
 import { CryptoRequest } from './types/request.interface';
-import { CryptoBaseResponse, CryptoResponse } from './types/response.interface';
-import { Subscribe, SubscriptionData, Unsubscribe } from './types/subscribe';
-import { WSService } from './ws.service';
+import {
+  CryptoRestRequest,
+  CryptoRestResponse,
+} from './types/rest-request.interface';
+import { Subscribe, SubscriptionData } from './types/subscribe';
 
 @Injectable()
 export class CryptoService {
@@ -16,10 +18,17 @@ export class CryptoService {
   constructor(
     private request: CryptoRequestService,
     private subscription: CryptoSubsbscriptionService,
+    private rest: CryptoRestRequestService,
   ) {}
 
   public makeRequest<T>(request: CryptoRequest<T>): Observable<T> {
     return this.request.makeRequest(request);
+  }
+
+  public make<T>(
+    request: CryptoRestRequest<T>,
+  ): Observable<CryptoRestResponse<T>> {
+    return this.rest.makeRequest(request);
   }
 
   public subscribe<T>(to: Subscribe<T>): Observable<SubscriptionData<T>> {

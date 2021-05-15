@@ -2,17 +2,22 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { combineLatest, Observable } from 'rxjs';
 import { map, tap } from 'rxjs/operators';
+import { CandlestickService } from 'src/app/services/candlestick.service';
+import {
+  InstrumentData,
+  InstrumentService,
+} from 'src/app/services/instruments.service';
 import {
   PositionData,
   PositionService,
 } from 'src/app/services/position.service';
-import { ChartData } from 'src/app/types/chart-data.type';
+import { CandlestickChartData, ChartData } from 'src/app/types/chart-data.type';
 
 @Component({
   selector: 'app-view-position',
   template: `
     <ng-container *ngIf="position$ | async as position">
-      <h1 class="card-header">
+      <h1 class="view-title">
         <button class="btn btn-icon" [routerLink]="'..'">
           <cds-icon shape="times"></cds-icon>
         </button>
@@ -28,9 +33,39 @@ import { ChartData } from 'src/app/types/chart-data.type';
       <app-position-chart [position]="position"></app-position-chart>
       <div class="card">
         <div class="card-block">
+          <div class="card-text position-info">
+            <div>
+              <b>Average Buy In:</b>
+              {{
+                position.avgBuyIn
+                  | number: getNumberFormat(position.instrument_data | async)
+              }}
+              {{ position.instrument.split('_')[1] }}
+            </div>
+            <div>
+              <b>Quantity:</b>
+              {{
+                position.quantity
+                  | number
+                    : getNumberFormat(position.instrument_data | async, false)
+              }}
+
+              {{ position.instrument.split('_')[0] }}
+            </div>
+            <div>
+              <b>Change:</b>
+              <app-change-since
+                [start]="position.avgBuyIn || 1"
+                [instrument]="position.instrument"
+                [direction]="position.side"
+              ></app-change-since>
+            </div>
+          </div>
+        </div>
+        <div class="card-block">
           <div class="card-text">
             <app-buy-form
-            [loading]="loading"
+              [loading]="loading"
               *ngIf="position.side == 'BUY'"
               (order)="buyIn(position, $event)"
               [instrument]="position.instrument"
@@ -53,19 +88,19 @@ import { ChartData } from 'src/app/types/chart-data.type';
   styles: [
     `
       @media screen and (max-width: 600px) {
-        h1.card-header {
+        .view-title {
           gap: 8px;
           flex-wrap: wrap;
           font-size: 10px;
-          font-weight: bold;
           line-height: 14px;
         }
-        app-change-since {
-          margin: 0 18px;
-        }
       }
-      .card-header {
-        margin: 0;
+      .position-info b {
+        min-width: 140px;
+        display: inline-block;
+      }
+      .view-title {
+        margin: 0 0 8px 0;
         font-size: 18px;
         display: flex;
         align-items: center;
@@ -79,6 +114,7 @@ export class ViewPositionComponent implements OnInit {
   position$: Observable<any>;
   loading = false;
   constructor(
+    private instrumentService: InstrumentService,
     private positionService: PositionService,
     private activatedRoute: ActivatedRoute,
     private router: Router
@@ -88,6 +124,7 @@ export class ViewPositionComponent implements OnInit {
         position
           ? {
               ...position,
+              instrument_data: this.instrumentService.get(position.instrument),
               ticker: this.positionService
                 .tickerStream(position.instrument)
                 .pipe(
@@ -115,6 +152,14 @@ export class ViewPositionComponent implements OnInit {
       .subscribe(() => {
         this.loading = false;
       });
+  }
+
+  getNumberFormat(instrument?: InstrumentData | null, price = true): string {
+    if (!instrument) return '1.10-10';
+    const dec = price
+      ? instrument.price_decimals
+      : instrument.quantity_decimals;
+    return '1.' + dec + '-' + dec;
   }
 
   closePosition(id: string) {

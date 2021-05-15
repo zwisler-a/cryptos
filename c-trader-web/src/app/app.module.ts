@@ -39,6 +39,7 @@ import { PieChartComponent } from './components/graphs/pie-chart.component';
 import { InvestmentPiechartComponent } from './components/investment-piechart.component';
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { WatchlistComponent } from './pages/dashboard/watchlist.component';
+import { CandlestickChartComponent } from './components/graphs/candlestick-chart.component';
 
 ClarityIcons.addIcons(namespaceIcon, timesIcon);
 
@@ -69,6 +70,7 @@ ClarityIcons.addIcons(namespaceIcon, timesIcon);
     InvestmentPiechartComponent,
     DashboardComponent,
     WatchlistComponent,
+    CandlestickChartComponent
   ],
   imports: [
     BrowserModule,

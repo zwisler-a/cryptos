@@ -11,22 +11,23 @@ import { Observable } from 'rxjs';
       [appBlinking]="data.a"
       *ngIf="data$ | async as data"
     >
-      <span>{{ name }}</span>
+      <span>{{ name }}</span>|
       <span class="tooltip tooltip-sm">
         <span>{{ data.a }}</span>
         <span class="tooltip-content">Last traded price</span>
-      </span>   
+      </span>
+      |
       <span class="tooltip tooltip-sm">
-      <span>{{ data.c | percentage: data.a }}</span>
+        <span>{{ data.c | percentage: data.a }}</span>
         <span class="tooltip-content">24h price change</span>
       </span>
-
     </div>
   `,
   styles: [
     `
-      span {
-        margin: 8px;
+      div {
+        display: flex;
+        gap: 8px;
       }
     `,
   ],

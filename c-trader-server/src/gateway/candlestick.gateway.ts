@@ -1,20 +1,29 @@
 import { Logger } from '@nestjs/common';
-import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
-import { Subscription } from 'rxjs';
+import {
+  ConnectedSocket,
+  MessageBody,
+  SubscribeMessage,
+  WebSocketGateway,
+  WebSocketServer,
+} from '@nestjs/websockets';
+import { concat, Subscription } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { Server, Socket } from 'socket.io';
 import { CryptoService } from 'src/crypto/crypto.service';
+import { PublicGetCandlestick } from 'src/crypto/types/requests/get-candlestick.rest.public';
 import { SubscribeCandlestick } from 'src/crypto/types/subscriptions/candlestick.subscription';
+import { SubscriptionManager } from './subscription-manager.class';
 
 @WebSocketGateway({ namespace: 'candlestick' })
-export class CandlestickGateway {
+export class CandlestickGateway extends SubscriptionManager {
   private logger = new Logger(CandlestickGateway.name);
-
-  private subscriptions: { [key: string]: Subscription } = {};
 
   @WebSocketServer()
   server: Server;
 
-  constructor(private cryptoService: CryptoService) {}
+  constructor(private cryptoService: CryptoService) {
+    super();
+  }
 
   @SubscribeMessage('subscribe')
   subscribeCandlestick(
@@ -24,17 +33,22 @@ export class CandlestickGateway {
     this.logger.debug(
       `Subscribe ${client.id} to candlestick ${body.interval} - ${body.instrument}`,
     );
-    this.subscriptions[client.id] = this.cryptoService
-      .subscribe(new SubscribeCandlestick(body.interval, body.instrument))
-      .subscribe((data) => {
-        client.emit('candlestick-data', data);
-      });
+    const sub = concat(
+      this.cryptoService
+        .make(new PublicGetCandlestick(body.instrument, body.interval))
+        .pipe(map((res) => res.result)),
+      this.cryptoService
+        .subscribe(new SubscribeCandlestick(body.interval, body.instrument))
+        .pipe(map((res) => res.result)),
+    ).subscribe((data) => {
+      client.emit(`candlestick-data-${body.instrument}-${body.interval}`, data);
+    });
+    this.subscribe(sub, client);
   }
 
   @SubscribeMessage('unsubscribe')
   unsubscribeCandlestick(@ConnectedSocket() client: Socket) {
     this.logger.debug(`Unsubscribe ${client.id} from candlestick`);
-    const sub = this.subscriptions[client.id];
-    if (sub) sub.unsubscribe();
+    this.unsubscribe(client);
   }
 }

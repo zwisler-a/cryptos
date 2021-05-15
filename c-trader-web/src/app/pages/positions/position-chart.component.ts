@@ -2,35 +2,40 @@ import { Component, Input, OnInit } from '@angular/core';
 import { LineStyle, PriceLineOptions } from 'lightweight-charts';
 import { concat, Observable, of } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { CandlestickService } from 'src/app/services/candlestick.service';
 import { InstrumentService } from 'src/app/services/instruments.service';
 import { PositionData } from 'src/app/services/position.service';
 import { TickerData, TickerService } from 'src/app/services/ticker.service';
-import { ChartData } from 'src/app/types/chart-data.type';
+import { CandlestickChartData, ChartData } from 'src/app/types/chart-data.type';
 
 @Component({
   selector: 'app-position-chart',
   template: `
-    <app-value-chart
+    <app-candlestick-chart
+      [data]="ticker$"
+      [decimalPlaces]="(deciamals$ | async) || 2"
+      [lines]="lines"
+    ></app-candlestick-chart>
+    <!-- <app-value-chart
       class="chart"
       [data]="ticker$"
       [rangeInMinutes]="chartRange"
       [decimalPlaces]="(deciamals$ | async) || 2"
       [lines]="lines"
-    ></app-value-chart>
+    ></app-value-chart> -->
 
     <div class="card-block">
       <div class="btn-group">
-        <div class="radio btn btn-sm">
-          <input type="radio" checked name="radios" id="radio-1" />
-          <label for="radio-1" (click)="setTimespanMinutes()">Stunde</label>
-        </div>
-        <div class="radio btn btn-sm">
-          <input type="radio" name="radios" id="radio-2" />
-          <label for="radio-2" (click)="setTimespanHours()">Tag</label>
-        </div>
-        <div class="radio btn btn-sm">
-          <input type="radio" name="radios" id="radio-3" />
-          <label for="radio-3" (click)="setTimespanMonth()">Monat</label>
+        <div class="radio btn btn-sm" *ngFor="let option of options">
+          <input
+            [checked]="currentOption === option"
+            type="radio"
+            name="radios"
+            [id]="option"
+          />
+          <label [for]="option" (click)="setTimespan(option)">{{
+            option
+          }}</label>
         </div>
       </div>
     </div>
@@ -45,7 +50,9 @@ import { ChartData } from 'src/app/types/chart-data.type';
   ],
 })
 export class PositionChartComponent implements OnInit {
-  ticker$?: Observable<ChartData[]>;
+  currentOption = '1m';
+  options = ['1m', '15m', '30m', '1h', '4h', '6h', '12h', '1D', '7D'];
+  ticker$?: Observable<CandlestickChartData[]>;
   deciamals$?: Observable<number> = of(2);
   lines: PriceLineOptions[] = [];
   _instrument?: string;
@@ -60,63 +67,41 @@ export class PositionChartComponent implements OnInit {
     this.lines = [
       {
         price: val.avgBuyIn,
-        color: 'red',
+        color: 'black',
         lineWidth: 1,
-        lineStyle: LineStyle.Solid,
-        axisLabelVisible: false,
-        title: 'BuyIn',
+        lineStyle: LineStyle.Dotted,
+        axisLabelVisible: true,
+        title: 'Avarage Buy In',
       } as PriceLineOptions,
     ];
   }
 
   constructor(
-    private tickerService: TickerService,
+    private candlestickService: CandlestickService,
     private instrumentService: InstrumentService
   ) {}
 
   ngOnInit(): void {
-    this.setTimespanMinutes();
+    if (window.innerWidth < 600) this.options = ['1m', '1h', '1D'];
+    this.setTimespan('1m');
   }
 
-  setTimespanMinutes() {
+  setTimespan(option: string) {
     if (!this._instrument) return;
-    this.ticker$ = concat(
-      this.tickerService.getHistoricalData(this._instrument, 60),
-      this.tickerService.stream(this._instrument).pipe(map((d) => [d]))
-    ).pipe(this.tickerService.roundTimePipe(60), this.toChartValue());
-    this.chartRange = 60;
+    this.ticker$ = this.candlestickService
+      .stream(option, this._instrument)
+      .pipe(this.toCandlestickChartValue());
+    this.currentOption = option;
   }
 
-  setTimespanHours() {
-    if (!this._instrument) return;
-    this.ticker$ = concat(
-      this.tickerService.getHistoricalData(
-        this._instrument,
-        60 * 24, // Data of a day
-        '15m'
-      ),
-      this.tickerService.stream(this._instrument).pipe(map((d) => [d]))
-    ).pipe(this.tickerService.roundTimePipe(60 * 15), this.toChartValue());
-    this.chartRange = 60 * 24;
-  }
-  setTimespanMonth() {
-    if (!this._instrument) return;
-    this.ticker$ = concat(
-      this.tickerService.getHistoricalData(
-        this._instrument,
-        60 * 24 * 30, // Data of a month
-        '1h'
-      ),
-      this.tickerService.stream(this._instrument).pipe(map((d) => [d]))
-    ).pipe(this.tickerService.roundTimePipe(60 * 60 * 2), this.toChartValue());
-    this.chartRange = 60 * 24 * 30;
-  }
-
-  private toChartValue() {
-    return map((data: TickerData[]) => {
-      return data.map((point) => {
-        return ChartData.from(new Date(point.data[0].t), point.data[0].a);
-      });
-    });
+  private toCandlestickChartValue() {
+    return (source$: Observable<any>) =>
+      source$.pipe(
+        map((res) =>
+          res.data.map((v: any) =>
+            CandlestickChartData.from(new Date(v.t), v.o, v.c, v.h, v.l)
+          )
+        )
+      );
   }
 }

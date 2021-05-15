@@ -1,56 +1,48 @@
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
-import { finalize, share, shareReplay } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { finalize, share } from 'rxjs/operators';
+
+import { WsSubscription } from './base/ws-subscription.class';
 
 export interface CandlestickData {
-  result: {
-    instrument_name: string; // instrument_name
-    subscription: string;
-    channel: string;
-    interval: string;
-    data: {
-      i: string;
-      o: number; // open
-      c: number; // close
-      h: number; // high
-      l: number; // low
-      v: number; // volume
-      t: number; // start time of the stick, in epochtime
-    }[];
-  };
+  instrument_name: string; // instrument_name
+  interval: string;
+  data: {
+    i?: string;
+    o: number; // open
+    c: number; // close
+    h: number; // high
+    l: number; // low
+    v: number; // volume
+    t: number; // start time of the stick, in epochtime
+  }[];
 }
 
 @Injectable({
   providedIn: 'root',
 })
 export class CandlestickService {
-  private streamSubject: Subject<CandlestickData[]> | null = null;
-  private streamObservable: Observable<CandlestickData[]> | null = null;
-  private currentBalance: CandlestickData[] = [];
+  private streams: { [key: string]: WsSubscription<CandlestickData> } = {};
 
-  constructor() {
-  }
+  constructor() {}
 
-  private handleTickerData(data: CandlestickData[]) {
-    if (this.streamSubject) {
-      this.streamSubject.next(data);
-    }
-  }
-
-  stream(interval: string, instrument: string): Observable<CandlestickData[]> {
-    if (!this.streamSubject || !this.streamObservable) {
-      this.streamSubject = new Subject();
-      this.streamObservable = this.streamSubject.pipe(
-        shareReplay(1),
-        finalize(() => {
-          this.streamSubject = null;
-          this.streamObservable = null;
-          // this.send('unsubscribe', { interval, instrument });
-        }),
-        share()
+  stream(interval: string, instrument: string): Observable<CandlestickData> {
+    const key = `${interval}_${instrument}`;
+    if (!this.streams[key]) {
+      this.streams[key] = new WsSubscription(
+        `candlestick`,
+        undefined,
+        undefined,
+        `candlestick-data-${instrument}-${interval}`,
+        { instrument, interval },
+        { instrument, interval }
       );
-      // this.send('subscribe', { interval, instrument });
     }
-    return this.streamObservable;
+    return this.streams[key].data$.pipe(
+      share(),
+      finalize(() => {
+        delete this.streams[key];
+      })
+    );
   }
 }

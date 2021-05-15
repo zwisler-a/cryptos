@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { CandlestickService } from './services/candlestick.service';
 import { OrderService } from './services/order.service';
 
 @Component({
@@ -7,7 +8,7 @@ import { OrderService } from './services/order.service';
   styles: [],
 })
 export class AppComponent {
-  constructor(private orderService: OrderService) {
-    // this.orderService.getOrders('SHIB_USDT', 20).subscribe(console.log);
+  constructor(private candlestick: CandlestickService) {
+    // this.candlestick.stream('1m', 'BTC_USDT').subscribe(console.log)
   }
 }

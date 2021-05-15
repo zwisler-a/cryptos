@@ -123,7 +123,6 @@ export class BuyFormComponent implements OnInit {
   data$?: Observable<FormData>;
 
   @Input() set instrument(val: string) {
-    console.log(val);
     this.subscribeToDataFor(val);
   }
   @Output() order = new EventEmitter<{ price: number }>();
