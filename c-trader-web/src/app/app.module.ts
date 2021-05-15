@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+import { ErrorHandler, NgModule } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { BrowserModule } from '@angular/platform-browser';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
@@ -40,6 +40,7 @@ import { InvestmentPiechartComponent } from './components/investment-piechart.co
 import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { WatchlistComponent } from './pages/dashboard/watchlist.component';
 import { CandlestickChartComponent } from './components/graphs/candlestick-chart.component';
+import { AlertService } from './pages/shell/alert.service';
 
 ClarityIcons.addIcons(namespaceIcon, timesIcon);
 
@@ -70,7 +71,7 @@ ClarityIcons.addIcons(namespaceIcon, timesIcon);
     InvestmentPiechartComponent,
     DashboardComponent,
     WatchlistComponent,
-    CandlestickChartComponent
+    CandlestickChartComponent,
   ],
   imports: [
     BrowserModule,
@@ -83,7 +84,7 @@ ClarityIcons.addIcons(namespaceIcon, timesIcon);
       enabled: environment.production,
       // Register the ServiceWorker as soon as the app is stable
       // or after 30 seconds (whichever comes first).
-      registrationStrategy: 'registerWhenStable:30000'
+      registrationStrategy: 'registerWhenStable:30000',
     }),
   ],
   providers: [
@@ -91,7 +92,13 @@ ClarityIcons.addIcons(namespaceIcon, timesIcon);
     InstrumentService,
     BalanceService,
     CandlestickService,
-    OrderService
+    OrderService,
+    AlertService,
+    {
+      // processes all errors
+      provide: ErrorHandler,
+      useExisting: AlertService,
+    },
   ],
   bootstrap: [AppComponent],
 })

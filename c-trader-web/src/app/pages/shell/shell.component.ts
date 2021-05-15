@@ -1,26 +1,28 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, ActivationEnd, Router } from '@angular/router';
 import { SwUpdate } from '@angular/service-worker';
+import { concat } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { AlertService } from './alert.service';
 
 @Component({
   selector: 'app-shell',
   template: `
     <clr-main-container>
       <clr-alert
-        *ngIf="newVersionAvialable"
-        clrAlertType="success"
+        *ngFor="let alert of alerts$ | async"
         [clrAlertAppLevel]="true"
+        [clrAlertType]="alert.type"
       >
         <clr-alert-item>
-          <div class="alert-text">
-            A new version is available. Would you like to reload?
-          </div>
-          <div class="alert-actions" (click)="reload()">
-            <button class="btn alert-action">Yes, please!</button>
+          <div class="alert-text">{{ alert.text }}</div>
+          <div class="alert-actions" (click)="alert.callback()">
+            <button class="btn alert-action">{{ alert.action }}</button>
           </div>
         </clr-alert-item>
       </clr-alert>
+
+      <clr-alert *ngIf="newVersionAvialable"> </clr-alert>
       <clr-header>
         <div class="branding">
           <a href="javascript://" class="nav-link">
@@ -54,7 +56,7 @@ import { filter } from 'rxjs/operators';
         </main>
       </div>
     </clr-main-container>
-    <div class="time">{{ date | date: 'hh:mm:ss': 'UTC' }}</div>
+    <div class="time">{{ date | date: 'hh:mm:ss':'UTC' }}</div>
   `,
   styles: [
     `
@@ -86,10 +88,24 @@ export class ShellComponent implements OnInit {
   date = new Date();
   newVersionAvialable = false;
   showIndicator: boolean = true;
-  constructor(swUpdate: SwUpdate, private router: Router) {
-    swUpdate.available.subscribe((event) => {
-      this.newVersionAvialable = true;
+  alerts$ = this.alert.alerts$;
+  constructor(
+    swUpdate: SwUpdate,
+    private router: Router,
+    private alert: AlertService
+  ) {
+    concat(
+      swUpdate.available,
+      this.alert.addAlert(
+        'Eine neue Version ist verfügber! Willst du sie laden?',
+        'Yeah, bitte!',
+        'success'
+      )
+    ).subscribe(() => {
+      window.location.reload();
     });
+
+    this.alert.alerts$.subscribe(console.log);
     this.router.events
       .pipe(filter((r) => r instanceof ActivationEnd))
       .subscribe((ev: any) => {
@@ -103,7 +119,5 @@ export class ShellComponent implements OnInit {
   ngOnInit(): void {
     setInterval(() => (this.date = new Date()), 1000);
   }
-  reload() {
-    window.location.reload();
-  }
+  reload() {}
 }
