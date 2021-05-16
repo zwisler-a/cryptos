@@ -29,6 +29,7 @@ export class CandlestickService {
   stream(interval: string, instrument: string): Observable<CandlestickData> {
     const key = `${interval}_${instrument}`;
     if (!this.streams[key]) {
+      console.log('Create ', key);
       this.streams[key] = new WsSubscription(
         `candlestick`,
         undefined,
@@ -38,11 +39,6 @@ export class CandlestickService {
         { instrument, interval }
       );
     }
-    return this.streams[key].data$.pipe(
-      share(),
-      finalize(() => {
-        delete this.streams[key];
-      })
-    );
+    return this.streams[key].data$;
   }
 }

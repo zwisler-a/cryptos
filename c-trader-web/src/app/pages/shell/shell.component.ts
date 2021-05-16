@@ -1,8 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, ActivationEnd, Router } from '@angular/router';
 import { SwUpdate } from '@angular/service-worker';
-import { concat } from 'rxjs';
+import { BehaviorSubject, concat, Subscription } from 'rxjs';
 import { filter } from 'rxjs/operators';
+import { io, Socket } from 'socket.io-client';
+import { WsSubscription } from 'src/app/services/base/ws-subscription.class';
 import { AlertService } from './alert.service';
 
 @Component({
@@ -13,16 +15,20 @@ import { AlertService } from './alert.service';
         *ngFor="let alert of alerts$ | async"
         [clrAlertAppLevel]="true"
         [clrAlertType]="alert.type"
+        (clrAlertClosed)="alert.callback(false)"
       >
         <clr-alert-item>
           <div class="alert-text">{{ alert.text }}</div>
-          <div class="alert-actions" (click)="alert.callback()">
+          <div
+            class="alert-actions"
+            *ngIf="alert.action"
+            (click)="alert.callback(true)"
+          >
             <button class="btn alert-action">{{ alert.action }}</button>
           </div>
         </clr-alert-item>
       </clr-alert>
 
-      <clr-alert *ngIf="newVersionAvialable"> </clr-alert>
       <clr-header>
         <div class="branding">
           <a href="javascript://" class="nav-link">
@@ -56,7 +62,13 @@ import { AlertService } from './alert.service';
         </main>
       </div>
     </clr-main-container>
-    <div class="time">{{ date | date: 'hh:mm:ss':'UTC' }}</div>
+    <div class="time">
+      <span
+        >Status:
+        {{ (socketConnected$ | async) ? 'Connected' : 'Disconnected' }}</span
+      >|
+      <span>{{ date | date: 'hh:mm:ss':'UTC' }}</span>
+    </div>
   `,
   styles: [
     `
@@ -80,32 +92,49 @@ import { AlertService } from './alert.service';
         bottom: 0;
         right: 0;
         background: #333;
+        display: flex;
+        gap: 8px;
       }
     `,
   ],
 })
 export class ShellComponent implements OnInit {
   date = new Date();
-  newVersionAvialable = false;
   showIndicator: boolean = true;
   alerts$ = this.alert.alerts$;
+  socketConnected$ = new BehaviorSubject(false);
   constructor(
-    swUpdate: SwUpdate,
+    private swUpdate: SwUpdate,
     private router: Router,
     private alert: AlertService
-  ) {
-    concat(
-      swUpdate.available,
-      this.alert.addAlert(
-        'Eine neue Version ist verfügber! Willst du sie laden?',
-        'Yeah, bitte!',
-        'success'
-      )
-    ).subscribe(() => {
-      window.location.reload();
-    });
+  ) {}
+  ngOnInit(): void {
+    this.handleReconnect();
+    this.handleWalletIndicator();
+    this.handleUpdate();
+    setInterval(() => (this.date = new Date()), 1000);
+  }
 
-    this.alert.alerts$.subscribe(console.log);
+  private handleReconnect() {
+    const socket = io();
+    let sub: Subscription | undefined = undefined;
+    socket.on('disconnect', () => {
+      sub = this.alert
+        .addAlert(
+          'Socket disconnected! Attempting reconnect ...',
+          undefined,
+          'warn'
+        )
+        .subscribe();
+      this.socketConnected$.next(false);
+    });
+    socket.on('connect', () => {
+      if (sub) sub.unsubscribe();
+      this.socketConnected$.next(true);
+    });
+  }
+
+  private handleWalletIndicator() {
     this.router.events
       .pipe(filter((r) => r instanceof ActivationEnd))
       .subscribe((ev: any) => {
@@ -116,8 +145,17 @@ export class ShellComponent implements OnInit {
         }
       });
   }
-  ngOnInit(): void {
-    setInterval(() => (this.date = new Date()), 1000);
+
+  private handleUpdate() {
+    concat(
+      this.swUpdate.available,
+      this.alert.addAlert(
+        'Eine neue Version ist verfügber! Willst du sie laden?',
+        'Yeah, bitte!',
+        'success'
+      )
+    ).subscribe(() => {
+      window.location.reload();
+    });
   }
-  reload() {}
 }

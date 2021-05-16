@@ -4,9 +4,10 @@ import { shareReplay } from 'rxjs/operators';
 
 export interface GlobalAlert {
   text: string;
-  action: string;
+  action?: string;
   type: string;
-  callback: () => void;
+  closable: boolean;
+  callback: (val?: any) => void;
 }
 
 @Injectable()
@@ -19,28 +20,37 @@ export class AlertService implements ErrorHandler {
 
   addAlert(
     text: string,
-    action: string,
-    type: string = 'warning'
+    action?: string,
+    type: string = 'warning',
+    closable = true
   ): Observable<void> {
     return new Observable((subscriber) => {
       const alert = {
         text,
         action,
         type,
-        callback: () => {
-          subscriber.next();
+        closable,
+        callback: (val?: any) => {
+          subscriber.next(val);
           subscriber.complete();
           this.alters.splice(this.alters.indexOf(alert), 1);
         },
       };
       this.alters.push(alert);
       this._alerts$.next(this.alters);
+      return () => {
+        this.alters.splice(this.alters.indexOf(alert), 1);
+      };
     });
   }
 
   handleError(error: Error) {
     this.zone.run(() =>
-      this.addAlert('An Error has occured: ' + error.message, 'Ok', 'danger').subscribe()
+      this.addAlert(
+        'An Error has occured: ' + error.message,
+        'Ok',
+        'danger'
+      ).subscribe()
     );
 
     console.error('Error from global error handler', error);

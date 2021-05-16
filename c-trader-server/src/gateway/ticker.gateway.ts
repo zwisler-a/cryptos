@@ -7,6 +7,7 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Subscription } from 'rxjs';
+import { throttleTime } from 'rxjs/operators';
 import { Server, Socket } from 'socket.io';
 import { TickerTrackingService } from 'src/data-tracking/ticker-tracking.service';
 import { TickerService } from 'src/service/ticker.service';
@@ -30,12 +31,13 @@ export class TickerGateway {
     @MessageBody() instrument: string,
     @ConnectedSocket() client: Socket,
   ) {
-    this.logger.debug(`Subscribe ${client.id} to ${instrument}`);
-    this.subscriptions[
-      `${client.id}_${instrument}`
-    ] = this.tickerService.getTicker(instrument).subscribe((data) => {
-      client.emit('data-' + instrument, data.result);
-    });
+    this.logger.debug(`Subscribe ${client.id} to ${instrument} ticker`);
+    this.subscriptions[`${client.id}_${instrument}`] = this.tickerService
+      .getTicker(instrument)
+      .pipe(throttleTime(300))
+      .subscribe((data) => {
+        client.emit('data-' + instrument, data.result);
+      });
   }
   @SubscribeMessage('unsubscribe')
   unsubscribeTicker(
@@ -53,7 +55,9 @@ export class TickerGateway {
     body: { instrument: string; timespan: number; interval: Interval },
     @ConnectedSocket() client: Socket,
   ) {
-    this.logger.debug(`Subscribe to Position Price ${body.instrument} - ${body.interval} - ${body.timespan} ...`);
+    this.logger.debug(
+      `Get instrument history ${body.instrument} - ${body.interval} - ${body.timespan} ...`,
+    );
     this.tickerTrackingService
       .getLast(body.instrument, body.timespan || 60, body.interval)
       .subscribe((data) => {

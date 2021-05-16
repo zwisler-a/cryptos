@@ -33,6 +33,7 @@ export class CandlestickGateway extends SubscriptionManager {
     this.logger.debug(
       `Subscribe ${client.id} to candlestick ${body.interval} - ${body.instrument}`,
     );
+    const subKey = `${client.id}_${body.interval}_${body.instrument}`;
     const sub = concat(
       this.cryptoService
         .make(new PublicGetCandlestick(body.instrument, body.interval))
@@ -43,12 +44,16 @@ export class CandlestickGateway extends SubscriptionManager {
     ).subscribe((data) => {
       client.emit(`candlestick-data-${body.instrument}-${body.interval}`, data);
     });
-    this.subscribe(sub, client);
+    this.subscribe(sub, client, subKey);
   }
 
   @SubscribeMessage('unsubscribe')
-  unsubscribeCandlestick(@ConnectedSocket() client: Socket) {
+  unsubscribeCandlestick(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() body: { interval: string; instrument: string },
+  ) {
     this.logger.debug(`Unsubscribe ${client.id} from candlestick`);
-    this.unsubscribe(client);
+    const subKey = `${client.id}_${body.interval}_${body.instrument}`;
+    this.unsubscribe(client, subKey);
   }
 }

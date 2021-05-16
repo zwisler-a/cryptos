@@ -8,6 +8,7 @@ interface SubscriptionPair<T> {
 }
 
 export class WsSubscription<T> {
+  static readonly sockets: { [key: string]: Socket } = {};
   protected socket: Socket;
   protected subscriptionPair: SubscriptionPair<T> | undefined;
   protected connected = false;
@@ -21,7 +22,13 @@ export class WsSubscription<T> {
     protected subscribeEventData: any = null,
     protected unsubscribeEventData: any = null
   ) {
-    this.socket = io(`/${namespace}`);
+    if (WsSubscription.sockets[namespace]) {
+      this.socket = WsSubscription.sockets[namespace];
+      this.connected = this.socket.connected;
+    } else {
+      this.socket = io(`/${namespace}`);
+      WsSubscription.sockets[namespace] = this.socket;
+    }
     this.socket.io.on('reconnect', this.onReconnected.bind(this));
     this.socket.on('connect', this.onConnected.bind(this));
     this.socket.on('disconnect', this.onDisonnected.bind(this));
@@ -66,13 +73,14 @@ export class WsSubscription<T> {
     if (this.connected) {
       this.socket.emit(event, data);
     } else {
+      console.log('Queuing request', event);
       this.queue.push({ event, data });
     }
   }
 
   private createSubscriptionPair(final: () => void): SubscriptionPair<T> {
     const subject = new Subject<T>();
-    const observable = subject.pipe(finalize(final), shareReplay(1));
+    const observable = subject.pipe(share(), finalize(final));
 
     return { observable, subject };
   }
