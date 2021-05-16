@@ -6,6 +6,7 @@ import {
   PrivateCreateOrder,
   PrivateCreateOrderResponse,
 } from 'src/crypto/types/requests/create-order.private';
+import { PublicGetInstuments } from 'src/crypto/types/requests/get-instruments.public';
 import {
   PrivateGetOrderDetails,
   PrivateGetOrderDetailsResponse,
@@ -48,7 +49,9 @@ export class PositionService {
   }
 
   private async reloadPositions() {
-    const positions = await this.positionRepo.find();
+    const positions = await this.positionRepo.find({
+      where: { closed: false },
+    });
     this.positionSubject$.next(positions);
   }
 
@@ -61,29 +64,49 @@ export class PositionService {
     this.logger.debug(
       `Sell position ${position.id} - ${position.instrument} ...`,
     );
+    const decimal$ = this.cryptoService
+      .makeRequest(new PublicGetInstuments())
+      .pipe(
+        map(
+          (instruments) =>
+            instruments.result.instruments.find(
+              (instrument) =>
+                instrument.instrument_name === position.instrument,
+            )[
+              position.side === 'SELL' ? 'quantity_decimals' : 'price_decimals'
+            ],
+        ),
+      );
 
-    const req = new PrivateCreateOrder();
-    req.params.instrument_name = position.instrument;
-    req.params.side = position.side;
-    req.params.type = 'MARKET';
-    if (position.side == 'SELL') {
-      req.params.notional = position.quantity;
-      req.params.side = 'BUY';
-    }
-    if (position.side == 'BUY') {
-      req.params.quantity = position.quantity;
-      req.params.side = 'SELL';
-    }
-
-    this.cryptoService
-      .makeRequest(req)
-      .pipe(this.checkIfOrderIsExecuted())
+    decimal$
+      .pipe(
+        map((decimals) => {
+          const req = new PrivateCreateOrder();
+          req.params.instrument_name = position.instrument;
+          req.params.side = position.side;
+          const d = Math.pow(10, decimals);
+          req.params.type = 'MARKET';
+          if (position.side == 'SELL') {
+            req.params.notional = position.quantity;
+            req.params.side = 'BUY';
+            throw Error('Not yet implemented!');
+          }
+          if (position.side == 'BUY') {
+            req.params.quantity = Math.floor(position.quantity * d) / d;
+            req.params.side = 'SELL';
+          }
+          return req;
+        }),
+        mergeMap((req) => this.cryptoService.makeRequest(req)),
+        this.checkIfOrderIsExecuted(),
+      )
       .subscribe(async (res) => {
         if (res.result.order_info.status !== 'FILLED') {
           this.logger.error('Order did not get filed!');
           return;
         }
-        await this.positionRepo.delete(id);
+        position.closed = true;
+        await this.positionRepo.save(position);
         subscriber.next(position);
         subscriber.complete();
       });
@@ -130,7 +153,8 @@ export class PositionService {
       0,
     );
 
-    const totalBoughtQuantity = order.result.order_info.cumulative_quantity - totalFee;
+    const totalBoughtQuantity =
+      order.result.order_info.cumulative_quantity - totalFee;
 
     const totalCost =
       position.avgBuyIn * position.quantity +

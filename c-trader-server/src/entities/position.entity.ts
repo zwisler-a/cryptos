@@ -8,12 +8,15 @@ export class PositionEntity {
   @Column()
   instrument: string;
 
-  @Column({ default: 0, type:'double' })
+  @Column({ default: false })
+  closed: boolean;
+
+  @Column({ default: 0, type: 'double' })
   avgBuyIn: number;
 
-  @Column({ default: 0, type:'double' })
+  @Column({ default: 0, type: 'double' })
   quantity: number;
 
-  @Column({default: 'BUY'})
+  @Column({ default: 'BUY' })
   side: string;
 }

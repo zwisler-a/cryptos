@@ -78,7 +78,11 @@ import { CandlestickChartData, ChartData } from 'src/app/types/chart-data.type';
           </div>
         </div>
         <div class="card-footer">
-          <button class="btn" (click)="closePosition(position.id)">
+          <button
+            class="btn"
+            (click)="closePosition(position.id)"
+            [clrLoading]="closeLoading"
+          >
             Position auflösen
           </button>
         </div>
@@ -113,6 +117,7 @@ import { CandlestickChartData, ChartData } from 'src/app/types/chart-data.type';
 export class ViewPositionComponent implements OnInit {
   position$: Observable<any>;
   loading = false;
+  closeLoading = false;
   constructor(
     private instrumentService: InstrumentService,
     private positionService: PositionService,
@@ -163,7 +168,10 @@ export class ViewPositionComponent implements OnInit {
   }
 
   closePosition(id: string) {
-    this.positionService.closePosition(id);
+    this.closeLoading = true;
+    this.positionService.closePosition(id).subscribe(() => {
+      this.closeLoading = false;
+    });
     this.router.navigate(['..']);
   }
 

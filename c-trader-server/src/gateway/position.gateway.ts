@@ -43,7 +43,9 @@ export class PositionGateway {
     @ConnectedSocket() client: Socket,
   ) {
     this.logger.debug(`Sell Out Position ...`);
-    this.positionService.closePosition(body.id);
+    this.positionService.closePosition(body.id).subscribe(() => {
+      client.emit('close-data-' + body.id);
+    });
   }
 
   @SubscribeMessage('subscribe')

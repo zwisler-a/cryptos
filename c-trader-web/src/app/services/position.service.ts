@@ -60,6 +60,12 @@ export class PositionService {
   }
 
   closePosition(id: string) {
-    this.wsSubscription.send('close', { id });
+    return new Observable((subscriber) => {
+      this.wsSubscription.once('close-data-' + id, (data) => {
+        subscriber.next(data);
+        subscriber.complete();
+      });
+      this.wsSubscription.send('close', { id });
+    });
   }
 }
