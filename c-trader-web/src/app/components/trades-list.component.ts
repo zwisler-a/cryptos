@@ -1,4 +1,5 @@
 import { Component, OnInit } from '@angular/core';
+import { Observable } from 'rxjs';
 import { TradesService } from '../services/trades.service';
 
 @Component({
@@ -43,7 +44,7 @@ import { TradesService } from '../services/trades.service';
   styles: [],
 })
 export class TradesListComponent implements OnInit {
-  trades$ = this.tradesService.stream();
+  trades$:Observable<any> = this.tradesService.stream();
 
   constructor(private tradesService: TradesService) {}
 

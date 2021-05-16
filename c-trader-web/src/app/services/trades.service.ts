@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { BufferedWsSubscription } from './base/buffered-ws-subscription.class';
+import { Observable } from 'rxjs';
 
 
 export interface TradesData {
@@ -18,10 +18,10 @@ export interface TradesData {
   providedIn: 'root',
 })
 export class TradesService {
-  private wsSubscription = new BufferedWsSubscription<TradesData>('trades', 20);
+  // private wsSubscription = new BufferedWsSubscription<TradesData>('trades', 20);
   constructor() {}
 
   stream() {
-    return this.wsSubscription.data$;
+    return new Observable();
   }
 }

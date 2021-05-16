@@ -73,7 +73,6 @@ export class WsSubscription<T> {
     if (this.connected) {
       this.socket.emit(event, data);
     } else {
-      console.log('Queuing request', event);
       this.queue.push({ event, data });
     }
   }

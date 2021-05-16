@@ -61,7 +61,6 @@ export class CandlestickChartComponent implements OnInit, OnDestroy {
       this.dataSubscription.unsubscribe();
     }
     if (val) {
-      console.log('resub');
       this.candleSeries?.setData([]);
       this.loading = true;
       this.dataSubscription = val.subscribe(this.updateData.bind(this));

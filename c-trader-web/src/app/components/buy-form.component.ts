@@ -3,10 +3,7 @@ import { combineLatest, Observable } from 'rxjs';
 import { filter, first, map, mergeMap } from 'rxjs/operators';
 
 import { BalanceData, BalanceService } from '../services/balance.service';
-import {
-  InstrumentData,
-  InstrumentService,
-} from '../services/instruments.service';
+import { InstrumentService } from '../services/instruments.service';
 import { TickerDataValues, TickerService } from '../services/ticker.service';
 
 type FormData = [
@@ -130,25 +127,6 @@ export class BuyFormComponent implements OnInit {
   bid: number = 0;
   volume: number = 0;
 
-  // private _bid = 0;
-  // set bid(val: number) {
-  //   if (this.tickerData)
-  //     this._volume = this.toFixed(val / this.tickerData.a, 'quantity');
-  //   this._bid = val;
-  // }
-  // get bid() {
-  //   return this._bid;
-  // }
-
-  // private _volume = 0;
-  // set volume(val: number) {
-  //   if (this.tickerData)
-  //     this._bid = this.toFixed(val * this.tickerData.a, 'price');
-  //   this._volume = val;
-  // }
-  // get volume() {
-  //   return this._volume;
-  // }
 
   constructor(
     private tickerService: TickerService,
@@ -186,23 +164,6 @@ export class BuyFormComponent implements OnInit {
         .stream()
         .pipe(this.selectBalances(quote_currenty, base_currenty)),
     ]);
-  }
-
-  private toFixed(val: number, what: 'quantity' | 'price') {
-    // const decimals = this.instrumentData
-    //   ? (this.instrumentData as any)[what + '_decimals'] || 20
-    //   : 20;
-    // return Number.parseFloat(val.toFixed(decimals));
-  }
-
-  private selectInstrument(instrument: string) {
-    return (source$: Observable<InstrumentData[]>) =>
-      source$.pipe(
-        first(),
-        map((instruments) =>
-          instruments.find((inst) => inst.instrument_name === instrument)
-        )
-      );
   }
 
   private selectBalances(quote: string, base: string) {
