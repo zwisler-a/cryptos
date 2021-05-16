@@ -127,7 +127,6 @@ export class BuyFormComponent implements OnInit {
   bid: number = 0;
   volume: number = 0;
 
-
   constructor(
     private tickerService: TickerService,
     private balanceService: BalanceService,
@@ -163,7 +162,7 @@ export class BuyFormComponent implements OnInit {
       this.balanceService
         .stream()
         .pipe(this.selectBalances(quote_currenty, base_currenty)),
-    ]);
+    ]).pipe(shareReplay(1));
   }
 
   private selectBalances(quote: string, base: string) {
