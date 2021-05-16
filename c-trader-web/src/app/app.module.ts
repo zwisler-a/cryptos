@@ -41,6 +41,7 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { WatchlistComponent } from './pages/dashboard/watchlist.component';
 import { CandlestickChartComponent } from './components/graphs/candlestick-chart.component';
 import { AlertService } from './pages/shell/alert.service';
+import { LoginComponent } from './pages/shell/login.component';
 
 ClarityIcons.addIcons(namespaceIcon, timesIcon);
 
@@ -72,6 +73,7 @@ ClarityIcons.addIcons(namespaceIcon, timesIcon);
     DashboardComponent,
     WatchlistComponent,
     CandlestickChartComponent,
+    LoginComponent,
   ],
   imports: [
     BrowserModule,

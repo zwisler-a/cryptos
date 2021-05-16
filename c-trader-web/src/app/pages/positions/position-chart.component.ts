@@ -12,17 +12,11 @@ import { CandlestickChartData, ChartData } from 'src/app/types/chart-data.type';
   selector: 'app-position-chart',
   template: `
     <app-candlestick-chart
-      [data]="ticker$"
+      [data]="candlestick$"
       [decimalPlaces]="(deciamals$ | async) || 2"
       [lines]="lines"
+      [ticker]="ticker$ | async"
     ></app-candlestick-chart>
-    <!-- <app-value-chart
-      class="chart"
-      [data]="ticker$"
-      [rangeInMinutes]="chartRange"
-      [decimalPlaces]="(deciamals$ | async) || 2"
-      [lines]="lines"
-    ></app-value-chart> -->
 
     <div class="card-block">
       <div class="btn-group">
@@ -52,7 +46,8 @@ import { CandlestickChartData, ChartData } from 'src/app/types/chart-data.type';
 export class PositionChartComponent implements OnInit {
   currentOption = '1m';
   options = ['1m', '15m', '30m', '1h', '4h', '6h', '12h', '1D', '7D'];
-  ticker$?: Observable<CandlestickChartData[]>;
+  candlestick$?: Observable<CandlestickChartData[]>;
+  ticker$?: Observable<TickerData>;
   deciamals$?: Observable<number> = of(2);
   lines: PriceLineOptions[] = [];
   _instrument?: string;
@@ -78,7 +73,8 @@ export class PositionChartComponent implements OnInit {
 
   constructor(
     private candlestickService: CandlestickService,
-    private instrumentService: InstrumentService
+    private instrumentService: InstrumentService,
+    private tickerService: TickerService
   ) {}
 
   ngOnInit(): void {
@@ -88,9 +84,10 @@ export class PositionChartComponent implements OnInit {
 
   setTimespan(option: string) {
     if (!this._instrument) return;
-    this.ticker$ = this.candlestickService
+    this.candlestick$ = this.candlestickService
       .stream(option, this._instrument)
       .pipe(this.toCandlestickChartValue());
+    this.ticker$ = this.tickerService.stream(this._instrument);
     this.currentOption = option;
   }
 

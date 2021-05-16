@@ -43,7 +43,7 @@ export class TickerGateway {
   unsubscribeTicker(
     @MessageBody() instrument: string,
     @ConnectedSocket() client: Socket,
-  ) {
+  ) { 
     this.logger.debug(`Unsubscribe ${client.id} from ${instrument}`);
     const sub = this.subscriptions[`${client.id}_${instrument}`];
     if (sub) sub.unsubscribe();

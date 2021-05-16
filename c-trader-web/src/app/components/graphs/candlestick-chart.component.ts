@@ -16,6 +16,7 @@ import {
   UTCTimestamp,
 } from 'lightweight-charts';
 import { Observable, Subscription } from 'rxjs';
+import { TickerData } from 'src/app/services/ticker.service';
 import { CandlestickChartData } from 'src/app/types/chart-data.type';
 
 @Component({
@@ -48,6 +49,8 @@ export class CandlestickChartComponent implements OnInit, OnDestroy {
   @ViewChild('chart', { static: true }) chartRef?: ElementRef<any>;
   private chart?: IChartApi;
   private candleSeries?: ISeriesApi<'Candlestick'>;
+
+  private lastData?: CandlestickChartData;
   loading = true;
 
   private dataSubscription?: Subscription;
@@ -66,6 +69,11 @@ export class CandlestickChartComponent implements OnInit, OnDestroy {
       this.dataSubscription = val.subscribe(this.updateData.bind(this));
     }
   }
+  @Input() set ticker(val: TickerData | null) {
+    if (!val || !this.lastData) return;
+    this.lastData.close = val.data[0].a;
+    this.updateData([this.lastData]);
+  }
 
   constructor() {}
   ngOnDestroy(): void {
@@ -77,7 +85,10 @@ export class CandlestickChartComponent implements OnInit, OnDestroy {
   private updateData(data: CandlestickChartData[]) {
     this.loading = false;
     if (!this.chart) window.requestAnimationFrame(() => this.updateData(data));
-    data.forEach((value) => this.candleSeries?.update(value));
+    data.forEach((value) => {
+      this.candleSeries?.update(value);
+      this.lastData = value;
+    });
     this.updateLines();
   }
 
@@ -85,21 +96,21 @@ export class CandlestickChartComponent implements OnInit, OnDestroy {
     this.chart = createChart(this.chartRef?.nativeElement, {
       crosshair: {
         vertLine: {
-            color: '#6A5ACD',
-            width: 1,
-            style: 1,
-            visible: true,
-            labelVisible: true,
+          color: '#6A5ACD',
+          width: 1,
+          style: 1,
+          visible: true,
+          labelVisible: true,
         },
         horzLine: {
-            color: '#6A5ACD',
-            width: 1,
-            style: 0,
-            visible: true,
-            labelVisible: true,
+          color: '#6A5ACD',
+          width: 1,
+          style: 0,
+          visible: true,
+          labelVisible: true,
         },
         mode: CrosshairMode.Normal,
-    },
+      },
       layout: { backgroundColor: '#33333300' },
       width: this.width,
       height: 300,

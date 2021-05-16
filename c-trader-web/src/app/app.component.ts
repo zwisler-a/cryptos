@@ -4,7 +4,7 @@ import { OrderService } from './services/order.service';
 
 @Component({
   selector: 'app-root',
-  template: ` <app-shell></app-shell> `,
+  template: ` <router-outlet></router-outlet> `,
   styles: [],
 })
 export class AppComponent {

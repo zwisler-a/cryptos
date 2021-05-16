@@ -1,6 +1,6 @@
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { combineLatest, Observable } from 'rxjs';
-import { filter, first, map, mergeMap } from 'rxjs/operators';
+import { filter, first, map, mergeMap, shareReplay, tap } from 'rxjs/operators';
 
 import { BalanceData, BalanceService } from '../services/balance.service';
 import { InstrumentService } from '../services/instruments.service';

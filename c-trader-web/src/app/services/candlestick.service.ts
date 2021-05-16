@@ -3,6 +3,7 @@ import { Observable } from 'rxjs';
 import { finalize, share } from 'rxjs/operators';
 
 import { WsSubscription } from './base/ws-subscription.class';
+import { TickerService } from './ticker.service';
 
 export interface CandlestickData {
   instrument_name: string; // instrument_name
@@ -40,4 +41,6 @@ export class CandlestickService {
     }
     return this.streams[key].data$;
   }
+
+
 }
