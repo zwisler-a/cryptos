@@ -87,6 +87,7 @@ export class CandlestickChartComponent implements OnInit, OnDestroy {
     this.loading = false;
     if (!this.chart) window.requestAnimationFrame(() => this.updateData(data));
     data.forEach((value) => {
+      if (this.lastData && this.lastData.time > value.time) return;
       this.candleSeries?.update(value);
       this.lastData = value;
     });
@@ -114,7 +115,7 @@ export class CandlestickChartComponent implements OnInit, OnDestroy {
       },
       layout: { backgroundColor: '#33333300' },
       width: this.width,
-      height: 300,
+      height: 400,
       timeScale: {
         timeVisible: true,
         secondsVisible: true,

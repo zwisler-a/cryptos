@@ -162,7 +162,7 @@ export class BuyFormComponent implements OnInit {
       this.balanceService
         .stream()
         .pipe(this.selectBalances(quote_currenty, base_currenty)),
-    ]).pipe(shareReplay(1));
+    ]);
   }
 
   private selectBalances(quote: string, base: string) {

@@ -104,7 +104,7 @@ export class WalletIndicatorComponent implements OnInit {
       this.totalBalanceService.getHistoricalData().pipe(this.fillTo(60)),
       this.totalBalanceService.stream$.pipe(map((d) => [d]))
     ).pipe(this.toChartValue());
-    this.balance$ = this.totalBalance$.pipe(this.balancePipe(59));
+    this.balance$ = this.totalBalance$.pipe(this.balancePipe(60));
   }
 
   private dayData() {

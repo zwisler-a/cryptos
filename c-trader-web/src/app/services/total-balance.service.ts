@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
+import { shareReplay } from 'rxjs/operators';
 
 import { WsSubscription } from './base/ws-subscription.class';
 
@@ -16,7 +17,7 @@ export interface BalanceHistroyData {
 })
 export class TotalBalanceService {
   private wsSubscription = new WsSubscription<BalanceHistroyData>('balance');
-  readonly stream$ = this.wsSubscription.data$;
+  readonly stream$ = this.wsSubscription.data$.pipe(shareReplay(1));
 
   constructor() {}
 

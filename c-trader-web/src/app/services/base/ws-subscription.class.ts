@@ -26,7 +26,7 @@ export class WsSubscription<T> {
       this.socket = WsSubscription.sockets[namespace];
       this.connected = this.socket.connected;
     } else {
-      this.socket = io(`/${namespace}`);
+      this.socket = io(`/${namespace}`, { transports: ['websocket'] });
       WsSubscription.sockets[namespace] = this.socket;
     }
     this.socket.io.on('reconnect', this.onReconnected.bind(this));
