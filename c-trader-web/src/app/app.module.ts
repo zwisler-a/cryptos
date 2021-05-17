@@ -42,6 +42,8 @@ import { WatchlistComponent } from './pages/dashboard/watchlist.component';
 import { CandlestickChartComponent } from './components/graphs/candlestick-chart.component';
 import { AlertService } from './pages/shell/alert.service';
 import { LoginComponent } from './pages/shell/login.component';
+import { HttpClientModule } from '@angular/common/http';
+import { AuthGuard } from './pages/shell/auth.guard';
 
 ClarityIcons.addIcons(namespaceIcon, timesIcon);
 
@@ -79,6 +81,7 @@ ClarityIcons.addIcons(namespaceIcon, timesIcon);
     BrowserModule,
     AppRoutingModule,
     FormsModule,
+    HttpClientModule,
     ClarityModule,
     BrowserAnimationsModule,
     LoggerModule.forRoot({ level: NgxLoggerLevel.DEBUG }),
@@ -90,6 +93,7 @@ ClarityIcons.addIcons(namespaceIcon, timesIcon);
     }),
   ],
   providers: [
+    AuthGuard,
     TickerService,
     InstrumentService,
     BalanceService,

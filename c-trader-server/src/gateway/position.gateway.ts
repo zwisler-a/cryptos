@@ -7,8 +7,10 @@ import {
   WebSocketServer,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
+import { Secured } from 'src/auth/auth.decorators';
 import { PositionService } from 'src/service/position.service';
 
+@Secured()
 @WebSocketGateway({ namespace: 'position' })
 export class PositionGateway {
   private logger = new Logger(PositionGateway.name);

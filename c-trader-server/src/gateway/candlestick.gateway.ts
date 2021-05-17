@@ -1,19 +1,16 @@
 import { Logger } from '@nestjs/common';
-import {
-  ConnectedSocket,
-  MessageBody,
-  SubscribeMessage,
-  WebSocketGateway,
-  WebSocketServer,
-} from '@nestjs/websockets';
-import { concat, Subscription } from 'rxjs';
+import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
+import { concat } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { Server, Socket } from 'socket.io';
+import { Secured } from 'src/auth/auth.decorators';
 import { CryptoService } from 'src/crypto/crypto.service';
 import { PublicGetCandlestick } from 'src/crypto/types/requests/get-candlestick.rest.public';
 import { SubscribeCandlestick } from 'src/crypto/types/subscriptions/candlestick.subscription';
+
 import { SubscriptionManager } from './subscription-manager.class';
 
+@Secured()
 @WebSocketGateway({ namespace: 'candlestick' })
 export class CandlestickGateway extends SubscriptionManager {
   private logger = new Logger(CandlestickGateway.name);

@@ -3,7 +3,8 @@ import { ConnectedSocket, SubscribeMessage, WebSocketGateway, WebSocketServer } 
 import { Server, Socket } from 'socket.io';
 import { CryptoService } from 'src/crypto/crypto.service';
 import { PublicGetInstuments } from 'src/crypto/types/requests/get-instruments.public';
-
+import { Secured } from '../auth/auth.decorators';
+@Secured()
 @WebSocketGateway({ namespace: 'instrument' })
 export class InstrumentGateway {
   private logger = new Logger(InstrumentGateway.name);

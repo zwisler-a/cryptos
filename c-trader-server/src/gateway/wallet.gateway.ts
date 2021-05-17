@@ -4,7 +4,8 @@ import { Socket } from 'socket.io';
 import { BalanceService } from 'src/service/balance.service';
 
 import { SubscriptionManager } from './subscription-manager.class';
-
+import { Secured } from '../auth/auth.decorators';
+@Secured()
 @WebSocketGateway({ namespace: 'wallet' })
 export class BalanceGateway extends SubscriptionManager {
   private logger = new Logger(BalanceGateway.name);

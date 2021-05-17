@@ -2,7 +2,8 @@ import { Logger } from '@nestjs/common';
 import { ConnectedSocket, MessageBody, SubscribeMessage, WebSocketGateway, WebSocketServer } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { OrderTrackingService } from 'src/data-tracking/order-tracking.service';
-
+import { Secured } from '../auth/auth.decorators';
+@Secured()
 @WebSocketGateway({ namespace: 'order' })
 export class OrderGateway {
   private logger = new Logger(OrderGateway.name);

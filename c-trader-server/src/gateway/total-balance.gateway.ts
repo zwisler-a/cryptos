@@ -10,7 +10,8 @@ import { BalanceTrackingService } from 'src/data-tracking/balance-tracking.servi
 import { BalanceService } from 'src/service/balance.service';
 
 import { SubscriptionManager } from './subscription-manager.class';
-
+import { Secured } from '../auth/auth.decorators';
+@Secured()
 @WebSocketGateway({ namespace: 'balance' })
 export class TotalBalanceGateway extends SubscriptionManager {
   private logger = new Logger(TotalBalanceGateway.name);

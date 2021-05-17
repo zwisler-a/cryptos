@@ -1,13 +1,22 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 import { ScheduleModule } from '@nestjs/schedule';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { join } from 'path';
 
 import { AppController } from './app.controller';
+import { AuthController } from './auth/auth.controller';
+import { AuthService } from './auth/auth.service';
+import { JwtAuthGuard, JwtStrategy } from './auth/jwt.strategy';
+import { LocalAuthGuard, LocalStrategy } from './auth/local.strategy';
 import { CryptoModule } from './crypto/crypto.module';
-import { DataTrackingModule, tickerEntities } from './data-tracking/data-tracking.module';
+import {
+  DataTrackingModule,
+  tickerEntities,
+} from './data-tracking/data-tracking.module';
 import { BalanceEntitiy } from './entities/balance.entity';
 import { PositionEntity } from './entities/position.entity';
 import { PositionRepository } from './entities/repos/position.repository';
@@ -27,7 +36,7 @@ import { TickerService } from './service/ticker.service';
 @Module({
   imports: [
     CryptoModule,
-    ConfigModule.forRoot({envFilePath: '.env'}),
+    ConfigModule.forRoot({ envFilePath: '.env' }),
     DataTrackingModule,
     ServeStaticModule.forRoot({
       rootPath: join(__dirname, 'client'),
@@ -49,8 +58,10 @@ import { TickerService } from './service/ticker.service';
     }),
     TypeOrmModule.forFeature([PositionRepository]),
     ScheduleModule.forRoot(),
+    PassportModule,
+    JwtModule.register({ secret: process.env.JWT_SECRET || 'shhh' }),
   ],
-  controllers: [AppController],
+  controllers: [AppController, AuthController],
   providers: [
     TickerGateway,
     BalanceGateway,
@@ -63,6 +74,10 @@ import { TickerService } from './service/ticker.service';
     BalanceService,
     TickerService,
     TotalBalanceGateway,
+
+    AuthService,
+    LocalStrategy,
+    JwtStrategy
   ],
 })
 export class AppModule {}

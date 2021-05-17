@@ -1,4 +1,6 @@
+import { HttpClient } from '@angular/common/http';
 import { Component, OnInit } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -67,11 +69,18 @@ export class LoginComponent implements OnInit {
     rememberMe: true,
   };
 
-  constructor() {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {}
 
-  login(){
-    
+  login() {
+    this.http
+      .post('/auth/login', {
+        username: this.form.username,
+        password: this.form.password,
+      })
+      .subscribe(() => {
+        this.router.navigate(['/']);
+      });
   }
 }

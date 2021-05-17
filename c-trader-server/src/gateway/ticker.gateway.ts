@@ -12,7 +12,8 @@ import { Server, Socket } from 'socket.io';
 import { TickerTrackingService } from 'src/data-tracking/ticker-tracking.service';
 import { TickerService } from 'src/service/ticker.service';
 import { Interval } from 'src/types/interval.type';
-
+import { Secured } from '../auth/auth.decorators';
+@Secured()
 @WebSocketGateway({ namespace: 'ticker' })
 export class TickerGateway {
   private logger = new Logger(TickerGateway.name);

@@ -1,7 +1,10 @@
 import { OnGatewayDisconnect } from '@nestjs/websockets';
 import { Subscription } from 'rxjs';
-import { Server, Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 
+import { Secured } from '../auth/auth.decorators';
+
+@Secured()
 export class SubscriptionManager implements OnGatewayDisconnect {
   private subscriptions: { [key: string]: Subscription } = {};
 

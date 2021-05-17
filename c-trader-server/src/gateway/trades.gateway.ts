@@ -4,7 +4,8 @@ import { Server, Socket } from 'socket.io';
 import { CryptoService } from 'src/crypto/crypto.service';
 import { PrivateGetTrades } from 'src/crypto/types/requests/get-trades.private';
 import { SubscribeUserTrades, SubscriptionDataUserTrades } from 'src/crypto/types/subscriptions/user-trade.subscription';
-
+import { Secured } from '../auth/auth.decorators';
+@Secured()
 @WebSocketGateway({ namespace: 'trades' })
 export class TradesGateway {
   private logger = new Logger(TradesGateway.name);
