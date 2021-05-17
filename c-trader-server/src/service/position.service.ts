@@ -73,7 +73,7 @@ export class PositionService {
               (instrument) =>
                 instrument.instrument_name === position.instrument,
             )[
-              position.side === 'SELL' ? 'quantity_decimals' : 'price_decimals'
+              position.side === 'BUY' ? 'quantity_decimals' : 'price_decimals'
             ],
         ),
       );
