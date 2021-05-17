@@ -1,4 +1,12 @@
-import { Controller, Get, Logger, Post, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Logger,
+  Post,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './jwt.strategy';
@@ -13,9 +21,11 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   public loginUser(@Req() req, @Res() res) {
     const jwtToken = this.authService.createToken(req.user);
-    res.cookie('auth', jwtToken);
+    res.cookie('auth', jwtToken, {
+      expire: new Date(Date.now() + 1000 * 60 * 60 * 24),
+    });
     this.logger.verbose('Login');
-    res.send({jwtToken});
+    res.send({ jwtToken });
   }
 
   @Get('/logout')

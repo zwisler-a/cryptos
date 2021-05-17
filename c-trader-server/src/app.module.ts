@@ -59,7 +59,10 @@ import { TickerService } from './service/ticker.service';
     TypeOrmModule.forFeature([PositionRepository]),
     ScheduleModule.forRoot(),
     PassportModule,
-    JwtModule.register({ secret: process.env.JWT_SECRET || 'shhh' }),
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'shhh',
+      signOptions: { expiresIn: '1d' },
+    }),
   ],
   controllers: [AppController, AuthController],
   providers: [
@@ -77,7 +80,7 @@ import { TickerService } from './service/ticker.service';
 
     AuthService,
     LocalStrategy,
-    JwtStrategy
+    JwtStrategy,
   ],
 })
 export class AppModule {}

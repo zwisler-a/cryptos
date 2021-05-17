@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, ActivationEnd, Router } from '@angular/router';
 import { SwUpdate } from '@angular/service-worker';
 import { BehaviorSubject, concat, Subscription } from 'rxjs';
-import { filter } from 'rxjs/operators';
+import { filter, mergeMap } from 'rxjs/operators';
 import { io, Socket } from 'socket.io-client';
 import { WsSubscription } from 'src/app/services/base/ws-subscription.class';
 import { AlertService } from './alert.service';
@@ -147,15 +147,18 @@ export class ShellComponent implements OnInit {
   }
 
   private handleUpdate() {
-    concat(
-      this.swUpdate.available,
-      this.alert.addAlert(
-        'Eine neue Version ist verfügber! Willst du sie laden?',
-        'Yeah, bitte!',
-        'success'
+    this.swUpdate.available
+      .pipe(
+        mergeMap(() =>
+          this.alert.addAlert(
+            'Eine neue Version ist verfügber! Willst du sie laden?',
+            'Yeah, bitte!',
+            'success'
+          )
+        )
       )
-    ).subscribe(() => {
-      window.location.reload();
-    });
+      .subscribe(() => {
+        window.location.reload();
+      });
   }
 }
