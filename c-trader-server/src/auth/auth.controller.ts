@@ -26,7 +26,9 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   public loginUser(@Req() req, @Res() res) {
     const jwtToken = this.authService.createToken(req.user);
-    res.cookie('userid', req.user.id, { expires: 2147483647 });
+    res.cookie('userid', req.user.id, {
+      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
+    });
     res.cookie('auth', jwtToken, {
       expires: new Date(Date.now() + 1000 * 60),
     });
@@ -60,7 +62,9 @@ export class AuthController {
     const user: UserToken = req.user;
     const result = await this.authService.response(response, user.id);
     if (result) {
-      res.cookie('userid', user.id);
+      res.cookie('userid', user.id, {
+        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
+      });
     }
     res.send({ result });
   }

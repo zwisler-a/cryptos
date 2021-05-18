@@ -16,7 +16,7 @@ import { AuthnService } from './authn.service';
           <h5 class="hint">Use your Company ID to sign in or create one now</h5> -->
           <img src="/assets/logo_black_md.png" />
         </section>
-        <ng-container *ngIf="">
+        <ng-container *ngIf="formLogin">
           <div class="login-group">
             <clr-input-container>
               <label class="clr-sr-only">Username</label>
