@@ -10,13 +10,14 @@ import { join } from 'path';
 import { AppController } from './app.controller';
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
-import { JwtAuthGuard, JwtStrategy } from './auth/jwt.strategy';
-import { LocalAuthGuard, LocalStrategy } from './auth/local.strategy';
+import { AuthInfos } from './auth/entity/auth-info.entity';
+import { AuthInfoRepository } from './auth/entity/auth-info.repository';
+import { UserEntity } from './auth/entity/user.entity';
+import { UserRepository } from './auth/entity/user.repository';
+import { JwtStrategy } from './auth/jwt.strategy';
+import { LocalStrategy } from './auth/local.strategy';
 import { CryptoModule } from './crypto/crypto.module';
-import {
-  DataTrackingModule,
-  tickerEntities,
-} from './data-tracking/data-tracking.module';
+import { DataTrackingModule, tickerEntities } from './data-tracking/data-tracking.module';
 import { BalanceEntitiy } from './entities/balance.entity';
 import { PositionEntity } from './entities/position.entity';
 import { PositionRepository } from './entities/repos/position.repository';
@@ -49,6 +50,8 @@ import { TickerService } from './service/ticker.service';
       password: process.env.DATABASE_PASSWORD,
       database: process.env.DATABASE_DB,
       entities: [
+        UserEntity,
+        AuthInfos,
         PositionEntity,
         BalanceEntitiy,
         TickerEntity,
@@ -56,7 +59,11 @@ import { TickerService } from './service/ticker.service';
       ],
       synchronize: true,
     }),
-    TypeOrmModule.forFeature([PositionRepository]),
+    TypeOrmModule.forFeature([
+      PositionRepository,
+      UserRepository,
+      AuthInfoRepository,
+    ]),
     ScheduleModule.forRoot(),
     PassportModule,
     JwtModule.register({

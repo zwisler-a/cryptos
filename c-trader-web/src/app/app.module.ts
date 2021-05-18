@@ -44,6 +44,7 @@ import { AlertService } from './pages/shell/alert.service';
 import { LoginComponent } from './pages/shell/login.component';
 import { HttpClientModule } from '@angular/common/http';
 import { AuthGuard } from './pages/shell/auth.guard';
+import { AuthnService } from './pages/shell/authn.service';
 
 ClarityIcons.addIcons(namespaceIcon, timesIcon);
 
@@ -93,6 +94,7 @@ ClarityIcons.addIcons(namespaceIcon, timesIcon);
     }),
   ],
   providers: [
+    AuthnService,
     AuthGuard,
     TickerService,
     InstrumentService,

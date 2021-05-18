@@ -20,6 +20,8 @@
     "@cds/core": "5.1.1",
     "@clr/angular": "5.1.1",
     "@clr/ui": "5.1.1",
+    "base64url": "^3.0.1",
+    "buffer": "^5.7.1",
     "chart.js": "^3.2.1",
     "chartjs-plugin-datalabels": "^2.0.0-beta.1",
     "lightweight-charts": "^3.3.0",
