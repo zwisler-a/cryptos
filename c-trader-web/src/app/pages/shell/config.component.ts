@@ -3,7 +3,7 @@ import { AuthnService } from './authn.service';
 
 @Component({
   selector: 'app-shell-config',
-  template: ` <button class="btn" (click)="registerFingerpring">Register fingerprint</button> `,
+  template: ` <button class="btn" (click)="registerFingerpring()">Register fingerprint</button> `,
   styles: [``],
 })
 export class ConfigComponent implements OnInit {
