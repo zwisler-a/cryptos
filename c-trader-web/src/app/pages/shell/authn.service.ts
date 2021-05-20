@@ -1,38 +1,45 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { from, of } from 'rxjs';
 import base64url from 'base64url';
-import { from } from 'rxjs';
-import { map, mergeMap, tap } from 'rxjs/operators';
+import { catchError, map, mergeMap, tap } from 'rxjs/operators';
 
 @Injectable()
 export class AuthnService {
   constructor(private http: HttpClient) {}
 
   login() {
-    return this.getAssertionChallenge().pipe(
+    return from(
+      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+    ).pipe(
+      map((res) => {
+        if (!res) throw Error('Platform auth not supported!');
+      }),
+      mergeMap(() => this.getAssertionChallenge()),
       map((res) => this.preformatGetAssertReq(res)),
-      mergeMap((publicKey) => from(navigator.credentials.get({ publicKey }))),
-      map((res) => this.publicKeyCredentialToJSON(res)),
-      mergeMap((res) => this.sendAuthnLoginResponse(res))
+      mergeMap((opts) => from(navigator.credentials.get(opts))),
+      map((res) => this.publicKeyCredentialToJSON(res as any)),
+      mergeMap((res) => this.sendAuthnLoginResponse(res)),
+      catchError((err) => (console.error(err), err))
     );
   }
 
   private getAssertionChallenge() {
-    return this.http.get('/auth/authn/login');
+    return this.http.get('/auth/authn/get-login-challange');
   }
 
   preformatGetAssertReq(getAssert: any) {
-    getAssert.challenge = this.decode(getAssert.challenge);
-
+    getAssert.challenge = this.strToBin(getAssert.challenge);
+    getAssert.timeout = 10000;
     for (let allowCred of getAssert.allowCredentials) {
-      allowCred.id = this.decode(allowCred.id);
+      allowCred.id = this.strToBin(allowCred.id);
     }
 
-    return getAssert;
+    return { publicKey: getAssert };
   }
 
   private sendAuthnLoginResponse(response: any) {
-    return this.http.post('/auth/authn/login-response', response);
+    return this.http.post('/auth/authn/login', response);
   }
 
   register() {
@@ -41,7 +48,7 @@ export class AuthnService {
       mergeMap((cred) =>
         from(navigator.credentials.create({ publicKey: cred }))
       ),
-      map((res) => this.publicKeyCredentialToJSON(res)),
+      map((res) => this.publicKeyCredentialToJSON(res as any)),
       mergeMap((res) => this.sendAuthnRegisterResponse(res))
     );
   }
@@ -51,71 +58,49 @@ export class AuthnService {
   }
 
   private getCredChallange() {
-    return this.http.get('/auth/authn/get-challange');
+    return this.http.get('/auth/authn/get-register-challange');
   }
 
   private preformatMakeCredReq(makeCredReq: any) {
-    makeCredReq.challenge = this.decode(makeCredReq.challenge);
-    makeCredReq.user.id = this.decode(makeCredReq.user.id);
+    makeCredReq.challenge = this.strToBin(makeCredReq.challenge);
+    makeCredReq.user.id = this.strToBin(makeCredReq.user.id);
     return makeCredReq;
   }
 
-  private publicKeyCredentialToJSON(pubKeyCred: any): any {
-    if (pubKeyCred instanceof Array) {
-      let arr = [];
-      for (let i of pubKeyCred) arr.push(this.publicKeyCredentialToJSON(i));
-
-      return arr;
+  private publicKeyCredentialToJSON(pubKeyCred: PublicKeyCredential): any {
+    const res = {
+      id: pubKeyCred.id,
+      rawId: this.binToStr(pubKeyCred.rawId),
+      type: pubKeyCred.type,
+      response: {} as any,
+    };
+    const response: any = pubKeyCred.response;
+    if (pubKeyCred.response.clientDataJSON) {
+      res.response.clientDataJSON = this.binToStr(
+        pubKeyCred.response.clientDataJSON
+      );
     }
-
-    if (pubKeyCred instanceof ArrayBuffer) {
-      return base64url.encode(pubKeyCred as any);
+    if (response.attestationObject) {
+      res.response.attestationObject = this.binToStr(
+        response.attestationObject
+      );
     }
-
-    if (pubKeyCred instanceof Object) {
-      let obj: any = {};
-
-      for (let key in pubKeyCred) {
-        obj[key] = this.publicKeyCredentialToJSON(pubKeyCred[key]);
-      }
-
-      return obj;
+    if (response.authenticatorData) {
+      res.response.authenticatorData = this.binToStr(
+        response.authenticatorData
+      );
     }
-
-    return pubKeyCred;
+    if (response.signature) {
+      res.response.signature = this.binToStr(response.signature);
+    }
+    return res;
   }
 
-  decode(base64: string) {
-    var chars =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_';
+  strToBin(str: string): Buffer {
+    return base64url.toBuffer(str);
+  }
 
-    // Use a lookup table to find the index.
-    var lookup = new Uint8Array(256);
-    for (var i = 0; i < chars.length; i++) {
-      lookup[chars.charCodeAt(i)] = i;
-    }
-    var bufferLength = base64.length * 0.75,
-      len = base64.length,
-      p = 0,
-      encoded1,
-      encoded2,
-      encoded3,
-      encoded4;
-
-    var arraybuffer = new ArrayBuffer(bufferLength),
-      bytes = new Uint8Array(arraybuffer);
-
-    for (var i = 0; i < len; i += 4) {
-      encoded1 = lookup[base64.charCodeAt(i)];
-      encoded2 = lookup[base64.charCodeAt(i + 1)];
-      encoded3 = lookup[base64.charCodeAt(i + 2)];
-      encoded4 = lookup[base64.charCodeAt(i + 3)];
-
-      bytes[p++] = (encoded1 << 2) | (encoded2 >> 4);
-      bytes[p++] = ((encoded2 & 15) << 4) | (encoded3 >> 2);
-      bytes[p++] = ((encoded3 & 3) << 6) | (encoded4 & 63);
-    }
-
-    return arraybuffer;
+  binToStr(bin: string | any): string {
+    return base64url.encode(bin);
   }
 }

@@ -45,6 +45,7 @@ import { LoginComponent } from './pages/shell/login.component';
 import { HttpClientModule } from '@angular/common/http';
 import { AuthGuard } from './pages/shell/auth.guard';
 import { AuthnService } from './pages/shell/authn.service';
+import { ConfigComponent } from './pages/shell/config.component';
 
 ClarityIcons.addIcons(namespaceIcon, timesIcon);
 
@@ -60,6 +61,7 @@ ClarityIcons.addIcons(namespaceIcon, timesIcon);
     PositionListComponent,
     CreatePositionComponent,
     ShellComponent,
+    ConfigComponent,
     PositionsComponent,
     TradesComponent,
     WalletComponent,

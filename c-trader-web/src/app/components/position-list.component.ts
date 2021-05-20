@@ -123,7 +123,7 @@ export class PositionListComponent implements OnInit {
   getDecimals(instrument: string) {
     return this.instrumentService.get(instrument).pipe(
       map((instrument) => {
-        if (!instrument) throw Error();
+        if (!instrument) throw Error('Cant find instrument ' + instrument);
         return {
           price: `1.${instrument.price_decimals}-${instrument.price_decimals}`,
           quantity: `1.${instrument.quantity_decimals}-${instrument.quantity_decimals}`,

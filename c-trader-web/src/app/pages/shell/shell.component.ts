@@ -63,10 +63,6 @@ import { AlertService } from './alert.service';
       </div>
     </clr-main-container>
     <div class="time">
-      <span
-        >Status:
-        {{ (socketConnected$ | async) ? 'Connected' : 'Disconnected' }}</span
-      >|
       <span>{{ date | date: 'hh:mm:ss':'UTC' }}</span>
     </div>
   `,
@@ -102,7 +98,6 @@ export class ShellComponent implements OnInit {
   date = new Date();
   showIndicator: boolean = true;
   alerts$ = this.alert.alerts$;
-  socketConnected$ = new BehaviorSubject(false);
   constructor(
     private swUpdate: SwUpdate,
     private router: Router,
@@ -126,11 +121,9 @@ export class ShellComponent implements OnInit {
           'warn'
         )
         .subscribe();
-      this.socketConnected$.next(false);
     });
     socket.on('connect', () => {
       if (sub) sub.unsubscribe();
-      this.socketConnected$.next(true);
     });
   }
 

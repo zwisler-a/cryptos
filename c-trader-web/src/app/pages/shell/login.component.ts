@@ -98,7 +98,6 @@ export class LoginComponent implements OnInit {
         username: this.form.username,
         password: this.form.password,
       })
-      .pipe(mergeMap(() => this.authnService.register()))
       .subscribe((res) => {
         if (res) this.router.navigate(['/']);
       });

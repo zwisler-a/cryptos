@@ -4,6 +4,7 @@ import { DashboardComponent } from './pages/dashboard/dashboard.component';
 import { PositionsComponent } from './pages/positions/positions.component';
 import { ViewPositionComponent } from './pages/positions/view-position.component';
 import { AuthGuard } from './pages/shell/auth.guard';
+import { ConfigComponent } from './pages/shell/config.component';
 import { LoginComponent } from './pages/shell/login.component';
 import { ShellComponent } from './pages/shell/shell.component';
 import { TradesComponent } from './pages/trades/trades.component';
@@ -14,7 +15,7 @@ const routes: Routes = [
   {
     path: '',
     component: ShellComponent,
-    canActivateChild:[AuthGuard],
+    canActivateChild: [AuthGuard],
     canActivate: [],
     children: [
       {
@@ -23,6 +24,7 @@ const routes: Routes = [
         data: { walletIndicator: false },
       },
       { path: 'positions', component: PositionsComponent },
+      { path: 'config', component: ConfigComponent },
       { path: 'positions/:id', component: ViewPositionComponent },
       { path: 'wallet', component: WalletComponent },
       { path: 'trades', component: TradesComponent },
