@@ -31,6 +31,15 @@ export class AuthCryptoWs extends CryptoWs {
     }, 1000);
   }
 
+ handleError(json: any) {
+    if (json.code === 10002) {
+      this.authenticated = false;
+      return this.reconnect();  
+    }
+   super.handleError(json);
+  }
+
+
   private authenticatedPipe() {
     return filter((json: any) => {
       if (json.method === PublicAuthResponse.method) {

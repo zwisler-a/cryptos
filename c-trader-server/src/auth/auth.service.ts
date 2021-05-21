@@ -1,15 +1,15 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import base64url from 'base64url';
-import { AuthnVerificator } from './authn/authn-verificator.class';
 
+import { AuthnVerificator } from './authn/authn-verificator.class';
 import { AuthnResponse } from './dto/authn-response.dto';
+import { LongToken } from './dto/long-token.dto';
 import { UserToken } from './dto/user-token.dto';
 import { AuthInfos } from './entity/auth-info.entity';
 import { AuthInfoRepository } from './entity/auth-info.repository';
 import { UserEntity } from './entity/user.entity';
 import { UserRepository } from './entity/user.repository';
-import { AuthnUtils } from './utils';
 
 @Injectable()
 export class AuthService {
@@ -36,6 +36,22 @@ export class AuthService {
       username: user.username,
     };
     return this.jwtService.sign(token);
+  }
+
+  createLongToken(user: UserEntity) {
+    const token: LongToken = {
+      userid: user.id,
+    };
+    return this.jwtService.sign(token, { expiresIn: '365d' });
+  }
+
+  varifyLongToken(token: string): LongToken {
+    try {
+      return this.jwtService.verify(token);
+    } catch (e) {
+      this.logger.error(e);
+      throw new UnauthorizedException();
+    }
   }
 
   async getAuthnRegisterChallenge(userToken: UserToken): Promise<any> {
@@ -120,83 +136,31 @@ export class AuthService {
     return getAssertion;
   }
 
-  async response(
+  async loginAuthn(
     autnResponse: AuthnResponse,
     userId: string,
   ): Promise<boolean> {
     if (autnResponse.type !== 'public-key') {
       throw Error('Response is not public-key');
-    } else {
-      const user = await this.userRepo.findOne(userId, {
-        relations: ['authInfos'],
-      });
-      const clientData = JSON.parse(
-        base64url.decode(autnResponse.response.clientDataJSON),
-      );
-
-      /* Check challenge... */
-      if (clientData.challenge !== user.challenge) {
-        throw new Error('Challenges do not match!');
-      }
-
-      /* ...and origin */
-      // if (clientData.origin !== this.config.get('ORIGIN_AUTHENT')) {
-      //   return JSON.stringify({
-      //     status: 'failed',
-      //     message: "Origins don't match!",
-      //   });
-      // }
-
-      let result;
-
-      if (autnResponse.response.attestationObject !== undefined) {
-        /* This is create cred */
-        result = this.authnUtils.verifyAuthenticatorAttestationResponse(
-          autnResponse,
-        );
-
-        if (result.verified) {
-          this.logger.debug('Adding authInfo');
-          user.authInfos = user.authInfos ? user.authInfos : [];
-
-          let authInfo = new AuthInfos();
-          authInfo.counter = result.authrInfo.counter;
-          authInfo.credID = result.authrInfo.credID;
-          authInfo.fmt = result.authrInfo.fmt;
-          authInfo.publicKey = base64url.encode(result.authrInfo.publicKey);
-          authInfo.user = user;
-          authInfo = await this.authInfoRepo.save(authInfo);
-
-          user.authInfos.push(authInfo);
-          await this.userRepo.save(user);
-        }
-      } else if (autnResponse.response.authenticatorData !== undefined) {
-        /* This is get assertion */
-        result = this.authnUtils.verifyAuthenticatorAssertionResponse(
-          autnResponse,
-          user.authInfos,
-        );
-      } else {
-        throw new Error('Unknown response type ...');
-      }
-
-      if (result.verified) {
-        return true;
-      } else {
-        return false;
-      }
     }
+    const user = await this.userRepo.findOne(userId, {
+      relations: ['authInfos'],
+    });
+    const clientData = JSON.parse(
+      base64url.decode(autnResponse.response.clientDataJSON),
+    );
+    if (autnResponse.response.authenticatorData === undefined) {
+      throw new Error('Unknown response type ...');
+    }
+    if (clientData.challenge !== user.challenge) {
+      throw new Error('Challenges do not match!');
+    }
+
+    let result = this.authnUtils.verifyAuthenticatorAssertionResponse(
+      autnResponse,
+      user.authInfos,
+    );
+
+    return result.verified;
   }
-
-  // async validateUser(payload: JWT): Promise<any> {
-  //   const response = await RegisterModel.findOne({
-  //     username: payload.username,
-  //   });
-  //   const user = response._doc;
-  //   return user;
-  // }
-
-  // isLoggedIn(payload: JWT): any {
-  //   return payload ? payload.loggedIn : false;
-  // }
 }

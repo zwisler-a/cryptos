@@ -90,7 +90,7 @@ export class CryptoWs {
     this.logger.error(`Unknown: ${JSON.stringify(json)}`);
   }
 
-  private reconnect() {
+  protected reconnect() {
     this.reconnecting = true;
     this.logger.debug(`Reconnecting ...`);
     setTimeout(() => {

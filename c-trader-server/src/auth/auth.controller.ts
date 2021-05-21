@@ -1,4 +1,14 @@
-import { Body, Controller, Get, Logger, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Logger,
+  Post,
+  Req,
+  Res,
+  UnauthorizedException,
+  UseGuards,
+} from '@nestjs/common';
 import { response } from 'express';
 
 import { AuthService } from './auth.service';
@@ -9,25 +19,30 @@ import { LocalAuthGuard } from './local.strategy';
 
 @Controller('auth')
 export class AuthController {
+  private longTokenOpts = {
+    expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
+  };
+  private readonly authCookieName = 'auth';
+  private readonly longCookieName = 'MFPDEUYGIQ';
   private logger = new Logger(AuthController.name);
   constructor(private authService: AuthService) {}
 
   @Post('/login')
   @UseGuards(LocalAuthGuard)
   public loginUser(@Req() req, @Res() res) {
+    this.logger.debug(`Logging in user ${req.user.username}.`);
     const jwtToken = this.authService.createToken(req.user);
-    res.cookie('userid', req.user.id, {
-      expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-    });
-    res.cookie('auth', jwtToken);
-    this.logger.verbose('Login');
+    const longToken = this.authService.createLongToken(req.user);
+    res.cookie(this.longCookieName, longToken, this.longTokenOpts);
+    res.cookie(this.authCookieName, jwtToken);
     res.send({ jwtToken });
   }
 
   @Get('/logout')
   @UseGuards(JwtAuthGuard)
   public logout(@Req() req, @Res() res) {
-    res.clearCookie('auth');
+    res.clearCookie(this.authCookieName);
+    res.clearCookie(this.longCookieName);
     res.send({ success: true });
   }
 
@@ -52,19 +67,17 @@ export class AuthController {
       response,
       user,
     );
-    if (result) {
-      res.cookie('userid', user.id, {
-        expires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 365),
-      });
-    }
     res.send({ result });
   }
 
   @Get('/authn/get-login-challange')
   async authnLogin(@Req() req, @Res() res) {
-    const userId = req.cookies['userid'];
-    if (!userId) throw new UnauthorizedException();
-    const assertion = await this.authService.getAutnLoginChallange(userId);
+    const longTokenStr = req.cookies[this.longCookieName];
+    if (!longTokenStr) throw new UnauthorizedException();
+    const longToken = this.authService.varifyLongToken(longTokenStr);
+    const assertion = await this.authService.getAutnLoginChallange(
+      longToken.userid,
+    );
     res.send(assertion);
   }
 
@@ -74,13 +87,18 @@ export class AuthController {
     @Res() res,
     @Body() response: AuthnResponse,
   ) {
-    const userId = req.cookies['userid'];
-    const result = await this.authService.response(response, userId);
+    const longTokenStr = req.cookies[this.longCookieName];
+    if (!longTokenStr) throw new UnauthorizedException();
+    const longToken = this.authService.varifyLongToken(longTokenStr);
+    const result = await this.authService.loginAuthn(
+      response,
+      longToken.userid,
+    );
     if (result) {
-      const jwtToken = await this.authService.createTokenById(userId);
-      res.cookie('auth', jwtToken);
+      const jwtToken = await this.authService.createTokenById(longToken.userid);
+      res.cookie(this.authCookieName, jwtToken);
     } else {
-      res.clearCookie('userid');
+      res.clearCookie(this.longCookieName);
     }
 
     res.send({ result });
