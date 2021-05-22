@@ -9,7 +9,7 @@ export class AuthCryptoWs extends CryptoWs {
   constructor(url: string, private signService: SignService) {
     super(url);
     this.onOpen$.subscribe(this.authenticate.bind(this));
-    this.onMessage$ = this._onMessage$.pipe(this.authenticatedPipe()); 
+    this.onMessage$ = this._onMessage$.pipe(this.authenticatedPipe());
   }
 
   send(data: string) {
@@ -33,12 +33,12 @@ export class AuthCryptoWs extends CryptoWs {
 
   handleError(json: any) {
     if (json.code === 10002) {
+      this.logger.error(`Unauthorized request. Reconnecting ...`);
       this.authenticated = false;
-      return this.reconnect();  
+      return this.reconnect();
     }
     super.handleError(json);
   }
-
 
   private authenticatedPipe() {
     return filter((json: any) => {
