@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Observable, Subject } from 'rxjs';
-import { finalize, share } from 'rxjs/operators';
+import { debounce, debounceTime, finalize, share } from 'rxjs/operators';
 
 import { CryptoRequestService } from './crypto-request.service';
 import { CryptoBaseResponse } from './types/response.interface';
@@ -15,6 +15,7 @@ interface SubscriptionPair {
 @Injectable()
 export class CryptoSubsbscriptionService {
   private logger = new Logger(CryptoSubsbscriptionService.name);
+  private subscriptionMonitor$ = new Subject();
   private initiatedSubscriptions: Subscribe<any>[] = [];
   private subscriptions: {
     [key: string]: SubscriptionPair;
@@ -26,6 +27,9 @@ export class CryptoSubsbscriptionService {
   ) {
     this.wssService.message$.subscribe(this.handleMessage.bind(this));
     this.wssService.reconnect$.subscribe(this.handleReconnect.bind(this));
+    this.subscriptionMonitor$
+      .pipe(debounceTime(60000 * 5))
+      .subscribe(this.handleReconnect.bind(this));
   }
 
   public subscribe<T>(to: Subscribe<T>): Observable<SubscriptionData<T>> {
@@ -50,6 +54,7 @@ export class CryptoSubsbscriptionService {
   private handleMessage(response: CryptoBaseResponse | SubscriptionData<any>) {
     if (SubscriptionData.isSubscription(response)) {
       this.handleSubscription(response);
+      this.subscriptionMonitor$.next();
     }
   }
 
@@ -57,9 +62,11 @@ export class CryptoSubsbscriptionService {
     const subscription = response.result.subscription;
     const channel = response.result.channel;
     if (this.subscriptions[channel]) {
+      this.logger.verbose(`Subscription data on ${channel}`);
       this.subscriptions[channel].s.next(response);
     }
     if (this.subscriptions[subscription]) {
+      this.logger.verbose(`Subscription data on ${subscription}`);
       this.subscriptions[subscription].s.next(response);
     }
     if (!this.subscriptions[channel]) {

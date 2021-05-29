@@ -131,9 +131,11 @@ export class WalletIndicatorComponent implements OnInit {
 
   private toChartValue() {
     return map((data: BalanceHistroyData[]) => {
-      return data.map((point) => {
-        return ChartData.from(new Date(point.timestamp), point.value);
-      });
+      return data
+        .filter((p) => !!p)
+        .map((point) => {
+          return ChartData.from(new Date(point.timestamp), point.value);
+        });
     });
   }
 

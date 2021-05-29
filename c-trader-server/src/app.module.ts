@@ -30,6 +30,7 @@ import { TickerGateway } from './gateway/ticker.gateway';
 import { TotalBalanceGateway } from './gateway/total-balance.gateway';
 import { TradesGateway } from './gateway/trades.gateway';
 import { BalanceGateway } from './gateway/wallet.gateway';
+import { LoggingModule } from './logging/logging.module';
 import { BalanceService } from './service/balance.service';
 import { PositionService } from './service/position.service';
 import { TickerService } from './service/ticker.service';
@@ -70,6 +71,7 @@ import { TickerService } from './service/ticker.service';
       secret: process.env.JWT_SECRET || 'shhh',
       signOptions: { expiresIn: '1d' },
     }),
+    LoggingModule
   ],
   controllers: [AppController, AuthController],
   providers: [

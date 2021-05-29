@@ -36,21 +36,14 @@ import { AlertService } from './alert.service';
           </a>
         </div>
         <div class="header-nav" [clr-nav-level]="1">
-          <a routerLinkActive="active" [routerLink]="'/dash'" class="nav-link">
-            <span class="nav-text">Dashboard</span>
-          </a>
           <a
+            *ngFor="let route of routes"
             routerLinkActive="active"
-            [routerLink]="'/positions'"
+            [routerLink]="route.path"
             class="nav-link"
-            ><span class="nav-text">Positions</span></a
           >
-          <a routerLinkActive="active" [routerLink]="'/wallet'" class="nav-link"
-            ><span class="nav-text">Wallet</span></a
-          >
-          <a routerLinkActive="active" [routerLink]="'/trades'" class="nav-link"
-            ><span class="nav-text">Trades</span></a
-          >
+            <span class="nav-text">{{ route.name }}</span>
+          </a>
         </div>
         <div class="settings" *ngIf="showIndicator">
           <app-wallet-indicator></app-wallet-indicator>
@@ -95,6 +88,14 @@ import { AlertService } from './alert.service';
   ],
 })
 export class ShellComponent implements OnInit {
+  routes = [
+    { path: '/dash', name: 'Dashboard' },
+    { path: '/positions', name: 'Positions' },
+    { path: '/wallet', name: 'Wallet' },
+    { path: '/trades', name: 'Trades' },
+    { path: '/settings', name: 'Settings' },
+  ];
+
   date = new Date();
   showIndicator: boolean = true;
   alerts$ = this.alert.alerts$;
