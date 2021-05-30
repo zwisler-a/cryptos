@@ -62,11 +62,9 @@ export class CryptoSubsbscriptionService {
     const subscription = response.result.subscription;
     const channel = response.result.channel;
     if (this.subscriptions[channel]) {
-      this.logger.verbose(`Subscription data on ${channel}`);
       this.subscriptions[channel].s.next(response);
     }
     if (this.subscriptions[subscription]) {
-      this.logger.verbose(`Subscription data on ${subscription}`);
       this.subscriptions[subscription].s.next(response);
     }
     if (!this.subscriptions[channel]) {

@@ -21,6 +21,25 @@ export class AuthService {
     private authInfoRepo: AuthInfoRepository,
   ) {}
 
+  async getDevices(userToken: UserToken) {
+    const user = await this.userRepo.findOne(userToken.id, {
+      relations: ['authInfos'],
+    });
+    const devices = user.authInfos.map((authInfo) => ({
+      id: authInfo.id,
+      count: authInfo.counter,
+    }));
+    return devices;
+  }
+
+  async clearDevices(userToken: UserToken) {
+    const user = await this.userRepo.findOne(userToken.id, {
+      relations: ['authInfos'],
+    });
+    user.authInfos = [];
+    await this.userRepo.save(user);
+  }
+
   async validateUser(username: string, password: string): Promise<any> {
     // TODO
     const user = await this.userRepo.find({ where: { username, password } });

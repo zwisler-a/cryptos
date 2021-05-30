@@ -1,14 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Logger,
-  Post,
-  Req,
-  Res,
-  UnauthorizedException,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Logger, Post, Req, Res, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { response } from 'express';
 
 import { AuthService } from './auth.service';
@@ -46,10 +36,18 @@ export class AuthController {
     res.send({ success: true });
   }
 
-  @Get('/id')
+  @Get('/authn/devices')
   @UseGuards(JwtAuthGuard)
   public id(@Req() req) {
-    return req.user;
+    const user: UserToken = req.user;
+    return this.authService.getDevices(user);
+  }
+
+  @Delete('/authn/clear-devices')
+  @UseGuards(JwtAuthGuard)
+  public clearDevices(@Req() req) {
+    const user: UserToken = req.user;
+    return this.authService.clearDevices(user);
   }
 
   @Get('/authn/get-register-challange')

@@ -50,6 +50,17 @@ export class PositionGateway {
     });
   }
 
+  @SubscribeMessage('delete')
+  async deletePosition(
+    @MessageBody() body: { id: string },
+    @ConnectedSocket() client: Socket,
+  ) {
+    this.logger.debug(`Delete Position ...`);
+    this.positionService.deletePosition(body.id).then(() => {
+      client.emit('delete-data-' + body.id);
+    });
+  }
+
   @SubscribeMessage('subscribe')
   subscribePosition(
     @MessageBody() body: any,

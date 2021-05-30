@@ -36,6 +36,13 @@ export class PositionService {
     this.reloadPositions();
   }
 
+  async deletePosition(id: string) {
+    const pos = await this.positionRepo.findOne(id);
+    await this.positionRepo.remove(pos);
+
+    this.reloadPositions();
+  }
+
   closePosition(id: string) {
     return new Observable((subscriber) => {
       this.executeClose(subscriber, id);
@@ -72,9 +79,7 @@ export class PositionService {
             instruments.result.instruments.find(
               (instrument) =>
                 instrument.instrument_name === position.instrument,
-            )[
-              position.side === 'BUY' ? 'quantity_decimals' : 'price_decimals'
-            ],
+            )[position.side === 'BUY' ? 'quantity_decimals' : 'price_decimals'],
         ),
       );
 

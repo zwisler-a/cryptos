@@ -8,6 +8,14 @@ import { catchError, map, mergeMap, tap } from 'rxjs/operators';
 export class AuthnService {
   constructor(private http: HttpClient) {}
 
+  getDevices() {
+    return this.http.get(`/auth/authn/devices`);
+  }
+
+  clearDevices() {
+    return this.http.delete(`/auth/authn/clear-devices`);
+  }
+
   login() {
     return from(
       PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()

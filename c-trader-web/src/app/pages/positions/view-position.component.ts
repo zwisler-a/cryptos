@@ -85,6 +85,13 @@ import { CandlestickChartData, ChartData } from 'src/app/types/chart-data.type';
           >
             Position auflösen
           </button>
+          <button
+            class="btn btn-warning"
+            (click)="deletePosition(position.id)"
+            [clrLoading]="closeLoading"
+          >
+            Position löschen
+          </button>
         </div>
       </div>
     </ng-container>
@@ -171,8 +178,16 @@ export class ViewPositionComponent implements OnInit {
     this.closeLoading = true;
     this.positionService.closePosition(id).subscribe(() => {
       this.closeLoading = false;
+      this.router.navigate(['..']);
     });
-    this.router.navigate(['..']);
+  } 
+
+  deletePosition(id: string) {
+    this.closeLoading = true;
+    this.positionService.deletePosition(id).subscribe(() => {
+      this.closeLoading = false;
+      this.router.navigate(['..']);
+    });
   }
 
   private selectedPosition() {

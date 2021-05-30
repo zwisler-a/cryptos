@@ -86,13 +86,17 @@ export class CryptoWs {
       return this.logger.error(
         `[${this.url}] ${json.code} BAD_REQUEST: ${json.message}`,
       );
+    if (json.code === 10007) {
+      this.logger.error(`Invalid nonce! Can't connect to crypto.com!`);
+      throw new Error('Invalid NONCE ... please check current time!');
+    }
 
     this.logger.error(`Unknown: ${JSON.stringify(json)}`);
   }
 
   protected reconnect() {
     this.reconnecting = true;
-    this.logger.debug(`Reconnecting ...`);
+    this.logger.debug(`Reconnecting ...`); 
     setTimeout(() => {
       try {
         this.ws.close();

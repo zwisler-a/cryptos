@@ -68,4 +68,16 @@ export class PositionService {
       this.wsSubscription.send('close', { id });
     });
   }
+  
+  deletePosition(id: string) {
+    return new Observable((subscriber) => {
+      this.wsSubscription.once('delete-data-' + id, (data) => {
+        subscriber.next(data);
+        subscriber.complete();
+      });
+      this.wsSubscription.send('delete', { id });
+    });
+  }
+
+
 }

@@ -34,6 +34,7 @@ import { ViewPositionComponent } from './pages/positions/view-position.component
 import { LogEntryComponent } from './pages/settings/log-entry.component';
 import { LoggingService } from './pages/settings/logging.service';
 import { SettingsComponent } from './pages/settings/settings.component';
+import { SettingsModule } from './pages/settings/settings.module';
 import { AlertService } from './pages/shell/alert.service';
 import { AuthGuard } from './pages/shell/auth.guard';
 import { AuthnService } from './pages/shell/authn.service';
@@ -79,11 +80,10 @@ ClarityIcons.addIcons(namespaceIcon, timesIcon);
     DashboardComponent,
     WatchlistComponent,
     CandlestickChartComponent,
-    LoginComponent,
-    SettingsComponent,
-    LogEntryComponent,
+    LoginComponent
   ],
   imports: [
+    SettingsModule,
     BrowserModule,
     AppRoutingModule,
     FormsModule,
